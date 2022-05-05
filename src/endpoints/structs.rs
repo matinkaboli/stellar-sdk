@@ -37,8 +37,6 @@ struct Flags {
 #[derive(Serialize, Deserialize, Debug)]
 struct NativeAsset {
     asset_type: String,
-    balance: String,
-    buying_liabilities: String,
     selling_liabilities: String,
 }
 

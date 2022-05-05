@@ -1,6 +1,6 @@
-mod horizon;
+mod endpoints;
 
-use horizon::*;
+use endpoints::Asset;
 
 fn main() {
     // let server = Server::new(String::from("https://horizon.stellar.org"));

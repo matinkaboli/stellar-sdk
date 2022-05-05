@@ -3,34 +3,18 @@ use serde_json;
 use std::collections::HashMap;
 use ureq;
 
-#[derive(Debug)]
-pub struct Asset<'a>(&'a str, &'a str, bool);
-
-impl<'a> Asset<'a> {
-    pub fn new(code: &'a str, issuer: &'a str) -> Self {
-        Asset(code, issuer, false)
-    }
-
-    pub fn as_str(&self) -> String {
-        format!("{}:{}", self.0, self.1)
-    }
-
-    pub fn native() -> Self {
-        Asset("XLM", "", true)
-    }
-}
-
-impl<'a> Eq for Asset<'a> {}
-impl<'a> PartialEq for Asset<'a> {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0 && self.1 == other.1 && self.2 == other.2
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TemplateLink {
     pub href: String,
     pub templated: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RecordLinks {
+    #[serde(rename(serialize = "self", deserialize = "self"))]
+    pub itself: Option<TemplateLink>,
+    pub next: Option<TemplateLink>,
+    pub prev: Option<TemplateLink>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -45,90 +29,49 @@ pub struct Links {
     pub effects: Option<TemplateLink>,
     pub offers: Option<TemplateLink>,
     pub trades: Option<TemplateLink>,
+    pub account: Option<TemplateLink>,
+    pub ledger: Option<TemplateLink>,
+    pub procedes: Option<TemplateLink>,
+    pub succeeds: Option<TemplateLink>,
+    pub transaction: Option<TemplateLink>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Thresholds {
-    pub low_threshold: u8,
-    pub med_threshold: u8,
-    pub high_threshold: u8,
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Embedded<T> {
+    records: Vec<T>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Flags {
-    pub auth_required: bool,
-    pub auth_revocable: bool,
-    pub auth_immutable: bool,
-    pub auth_clawback_enabled: bool,
+#[derive(Deserialize, Serialize, Debug)]
+pub struct AccountRecord<T> {
+    pub _links: Links,
+    pub _embedded: Embedded<T>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Balance {
-    pub asset_type: String,
-    pub limit: Option<String>,
-    pub buying_liabilities: Option<String>,
-    pub selling_liabilities: Option<String>,
-    pub last_modified_ledger: Option<u64>,
-    pub liquidity_pool_id: Option<String>,
-    pub is_authorized: Option<bool>,
-    pub is_authorized_to_maintain_liabilities: Option<bool>,
-    pub balance: String,
-    pub asset_code: Option<String>,
-    pub asset_issuer: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Signers {
-    pub weight: u32,
-    pub key: String,
-    pub r#type: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Account {
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Transaction {
+    pub memo: String,
+    pub memo_bytes: String,
     pub _links: Links,
     pub id: String,
-    pub account_id: String,
-    pub sequence: String,
-    pub subentry_count: u32,
-    pub inflation_destination: Option<String>,
-    pub home_domain: Option<String>,
-    pub last_modified_ledger: u64,
-    pub last_modified_time: String,
-    pub thresholds: Thresholds,
-    pub flags: Flags,
-    pub balances: Vec<Balance>,
-    pub signers: Vec<Signers>,
-    pub data: HashMap<String, String>,
-    pub num_sponsoring: i32,
-    pub num_sponsored: i32,
     pub paging_token: String,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Embedded {
-    records: Vec<Account>,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct AccountRecord {
-    pub _links: Links,
-    pub _embedded: Embedded,
-}
-
-impl Account {
-    pub fn increment_sequence_number(&mut self) {
-        let n: u64 = self.sequence.parse().unwrap();
-
-        self.sequence = (n + 1).to_string();
-    }
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-struct Presale {
-    address: String,
-    usdt: String,
-    rbt: String,
+    pub successful: bool,
+    pub hash: String,
+    pub ledger: u64,
+    pub created_at: String,
+    pub source_account: String,
+    pub source_account_sequence: String,
+    pub fee_account: String,
+    pub fee_charged: String,
+    pub max_fee: String,
+    pub operation_count: u64,
+    pub envelope_xdr: String,
+    pub result_xdr: String,
+    pub result_meta_xdr: String,
+    pub fee_meta_xdr: String,
+    pub memo_type: String,
+    pub signatures: Vec<String>,
+    pub valid_after: String,
+    pub valid_before: String,
 }
 
 fn req(url: &str) -> Result<String, ureq::Error> {
@@ -220,7 +163,7 @@ impl<'a> AccountCallBuilder<'a> {
         self
     }
 
-    pub fn call(&self) -> Result<AccountRecord, &str> {
+    pub fn call(&self) -> Result<AccountRecord<Account>, &str> {
         let mut url = String::from(&self.server.0);
 
         url.push_str("/accounts?");
@@ -264,7 +207,7 @@ impl<'a> AccountCallBuilder<'a> {
 
         match resp {
             Ok(d) => {
-                let p: AccountRecord = serde_json::from_str(&d).unwrap();
+                let p: AccountRecord<Account> = serde_json::from_str(&d).unwrap();
 
                 Ok(p)
             }
@@ -308,44 +251,3 @@ impl Server {
         }
     }
 }
-
-// let content = std::fs::read_to_string("./data/presale.json").unwrap();
-
-// let addresses: Vec<Presale> = serde_json::from_str(&content).unwrap();
-
-// for address in addresses {
-//     std::thread::spawn(move || {
-//         check_token(&address.address);
-//     })
-//     .join()
-//     .unwrap();
-// }
-
-// #[tokio::main]
-// async fn check_token(address: &str) -> Result<i16, Box<dyn std::error::Error>> {
-//     let rbt = (
-//         "RBT",
-//         "GCMSCRWZ3QBOI6AF75B5ZWDBXOSMIRW4FSBZH5OI65Y4H4GVH7LPSOYS",
-//     );
-
-//     let resp = reqwest::get(format!(
-//         "{}{}",
-//         "https://horizon.stellar.org/accounts/", address
-//     ))
-//     .await?
-//     .text()
-//     .await?;
-
-//     let p: Account = serde_json::from_str(&resp).unwrap();
-
-//     for i in p.balances {
-//         if let Some(x) = i.asset_code {
-//             if x == rbt.0.to_owned() && i.asset_issuer == Some(rbt.1.to_owned()) {
-//                 return Ok(0);
-//             }
-//         }
-//     }
-
-//     println!("Address {} does NOT have trustline", address);
-//     Ok(1)
-// }
