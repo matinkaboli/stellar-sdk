@@ -136,3 +136,23 @@ impl<'a> AccountCallBuilder<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn limit_account_call_builder() {
+        let s = Server::new(String::from("https://horizon.stellar.org"));
+
+        let mut acb = AccountCallBuilder::new(&s);
+
+        let account_records = acb
+            .liquidity_pool("a468d41d8e9b8f3c7209651608b74b7db7ac9952dcae0cdf24871d1d9c7b0088")
+            .limit(3)
+            .call()
+            .unwrap();
+
+        assert_eq!(account_records._embedded.records.len(), 3);
+    }
+}

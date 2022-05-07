@@ -1,7 +1,19 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::endpoints::Links;
+use crate::endpoints::*;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct AccountLinks {
+    #[serde(rename(serialize = "self", deserialize = "self"))]
+    pub itself: TemplateLink,
+    pub transactions: Option<TemplateLink>,
+    pub operations: Option<TemplateLink>,
+    pub payments: Option<TemplateLink>,
+    pub effects: Option<TemplateLink>,
+    pub offers: Option<TemplateLink>,
+    pub trades: Option<TemplateLink>,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Thresholds {
@@ -19,55 +31,57 @@ pub struct Flags {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Balance<'a> {
-    pub balance: &'a str,
-    pub asset_type: &'a str,
-    pub limit: Option<&'a str>,
-    pub buying_liabilities: Option<&'a str>,
-    pub selling_liabilities: Option<&'a str>,
+pub struct Balance {
+    pub balance: String,
+    pub asset_type: String,
+    pub limit: Option<String>,
+    pub buying_liabilities: Option<String>,
+    pub selling_liabilities: Option<String>,
     pub last_modified_ledger: Option<u64>,
-    pub liquidity_pool_id: Option<&'a str>,
+    pub liquidity_pool_id: Option<String>,
     pub is_authorized: Option<bool>,
     pub is_authorized_to_maintain_liabilities: Option<bool>,
-    pub asset_code: Option<&'a str>,
-    pub asset_issuer: Option<&'a str>,
+    pub asset_code: Option<String>,
+    pub asset_issuer: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Signers<'a> {
+pub struct Signers {
     pub weight: u32,
-    pub key: &'a str,
-    pub r#type: &'a str,
+    pub key: String,
+    pub r#type: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Account<'a> {
-    pub _links: Links,
-    pub id: &'a str,
-    pub account_id: &'a str,
-    pub sequence: &'a str,
+pub struct Account {
+    pub _links: AccountLinks,
+    pub id: String,
+    pub account_id: String,
+    pub sequence: String,
     pub subentry_count: u32,
-    pub inflation_destination: Option<&'a str>,
-    pub home_domain: Option<&'a str>,
+    pub inflation_destination: Option<String>,
+    pub home_domain: Option<String>,
     pub last_modified_ledger: u64,
-    pub last_modified_time: &'a str,
+    pub last_modified_time: String,
     pub thresholds: Thresholds,
     pub flags: Flags,
-    pub balances: Vec<Balance<'a>>,
-    pub signers: Vec<Signers<'a>>,
-    pub data: HashMap<&'a str, &'a str>,
+    pub balances: Vec<Balance>,
+    pub signers: Vec<Signers>,
+    pub data: HashMap<String, String>,
     pub num_sponsoring: i32,
     pub num_sponsored: i32,
-    pub paging_token: &'a str,
+    pub paging_token: String,
 }
 
-impl<'a> Account<'a> {
-    // pub fn increment_sequence_number(mut self) {
-    //     let parsed: u64 = self.sequence.parse().unwrap();
-    //     let parsed = parsed + 1;
-    //     let parsed = parsed.to_string();
-    //     self.sequence = parsed;
-    // }
+impl Account {
+    pub fn increment_sequence_number(&mut self) {
+        let mut new_sequence: u64 = self.sequence.parse().unwrap();
+        new_sequence += 1;
+
+        let new_sequence = new_sequence.to_string();
+
+        self.sequence = new_sequence;
+    }
 
     pub fn transactions(&self) {}
 
@@ -86,19 +100,17 @@ impl<'a> Account<'a> {
 mod tests {
     use super::*;
 
-    use crate::endpoints::*;
-
     #[test]
     fn sequence_number_adds() {
         let mut my_account = Account {
-                _links: Links {
+                _links: AccountLinks {
                     itself: TemplateLink {
-                        href: "https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM",
+                        href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM"),
                         templated: None,
                     },
                     transactions: Some(
                         TemplateLink {
-                            href: "https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/transactions{?cursor,limit,order}",
+                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/transactions{?cursor,limit,order}"),
                             templated: Some(
                                 true,
                             ),
@@ -106,7 +118,7 @@ mod tests {
                     ),
                     operations: Some(
                         TemplateLink {
-                            href: "https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/operations{?cursor,limit,order}",
+                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/operations{?cursor,limit,order}"),
                             templated: Some(
                                 true,
                             ),
@@ -114,7 +126,7 @@ mod tests {
                     ),
                     payments: Some(
                         TemplateLink {
-                            href: "https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/payments{?cursor,limit,order}",
+                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/payments{?cursor,limit,order}"),
                             templated: Some(
                                 true,
                             ),
@@ -122,7 +134,7 @@ mod tests {
                     ),
                     effects: Some(
                         TemplateLink {
-                            href: "https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/effects{?cursor,limit,order}",
+                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/effects{?cursor,limit,order}"),
                             templated: Some(
                                 true,
                             ),
@@ -130,7 +142,7 @@ mod tests {
                     ),
                     offers: Some(
                         TemplateLink {
-                            href: "https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/offers{?cursor,limit,order}",
+                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/offers{?cursor,limit,order}"),
                             templated: Some(
                                 true,
                             ),
@@ -138,23 +150,23 @@ mod tests {
                     ),
                     trades: Some(
                         TemplateLink {
-                            href: "https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/trades{?cursor,limit,order}",
+                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/trades{?cursor,limit,order}"),
                             templated: Some(
                                 true,
                             ),
                         },
                     ),
                 },
-                id: "GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM",
-                account_id: "GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM",
-                sequence: "129664371176506169",
+                id: String::from("GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM"),
+                account_id: String::from("GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM"),
+                sequence: String::from("129664371176506169"),
                 subentry_count: 26,
                 inflation_destination: Some(
-                    "GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM",
+                    String::from("GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM"),
                 ),
                 home_domain: None,
                 last_modified_ledger: 40702343,
-                last_modified_time: "2022-05-01T14:18:19Z",
+                last_modified_time: String::from("2022-05-01T14:18:19Z"),
                 thresholds: Thresholds {
                     low_threshold: 1,
                     med_threshold: 1,
@@ -168,16 +180,16 @@ mod tests {
                 },
                 balances: vec![
                     Balance {
-                        balance: "370.3906091",
-                        asset_type: "credit_alphanum4",
+                        balance: String::from("370.3906091"),
+                        asset_type: String::from("credit_alphanum4"),
                         limit: Some(
-                            "300000.0000000",
+                            String::from("300000.0000000"),
                         ),
                         buying_liabilities: Some(
-                            "0.0000000",
+                            String::from("0.0000000"),
                         ),
                         selling_liabilities: Some(
-                            "0.0000000",
+                            String::from("0.0000000"),
                         ),
                         last_modified_ledger: Some(
                             40304840,
@@ -190,37 +202,33 @@ mod tests {
                             true,
                         ),
                         asset_code: Some(
-                            "AFR",
+                            String::from("AFR"),
                         ),
                         asset_issuer: Some(
-                            "GBX6YI45VU7WNAAKA3RBFDR3I3UKNFHTJPQ5F6KOOKSGYIAM4TRQN54W",
+                            String::from("GBX6YI45VU7WNAAKA3RBFDR3I3UKNFHTJPQ5F6KOOKSGYIAM4TRQN54W"),
                         ),
                     },
                 ],
                 signers: vec![
                     Signers {
                         weight: 2,
-                        key: "GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM",
-                        r#type: "ed25519_public_key",
+                        key: String::from("GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM"),
+                        r#type: String::from("ed25519_public_key"),
                     },
                 ],
                 data: HashMap::new(),
                 num_sponsoring: 0,
                 num_sponsored: 0,
-                paging_token: "GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM",         
+                paging_token: String::from("GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM"),         
         };
 
-        println!("{:#?}", my_account);
+        my_account.increment_sequence_number();
 
-        let a = my_account.account_id;
-        let b = my_account.account_id;
+        let seq = String::from("129664371176506169");
+        let mut seq: u64 = seq.parse().unwrap();
+        seq += 1;
+        let seq = seq.to_string();
 
-        // let old_sequence = my_account.sequence;
-
-        // my_account.increment_sequence_number();
-
-        // let new_sequence = &mut my_account.sequence;
-
-        // assert_eq!(&old_sequence, new_sequence);
+        assert_eq!(seq, my_account.sequence);
     }
 }

@@ -1,7 +1,6 @@
 use serde_json;
 
-use crate::endpoints::Account;
-use crate::endpoints::AccountCallBuilder;
+use crate::endpoints::{Account, AccountCallBuilder, Transaction};
 use crate::utils::req;
 
 #[derive(Debug)]
@@ -37,5 +36,46 @@ impl Server {
             liquidity_pool: None,
             asset: None,
         }
+    }
+
+    pub fn load_transaction(&self, hash: &str) -> Result<Transaction, &str> {
+        let url = format!("{}/transactions/{}", self.0, hash);
+        let resp = req(&url);
+
+        match resp {
+            Ok(d) => {
+                let p: Transaction = serde_json::from_str(&d).unwrap();
+
+                Ok(p)
+            }
+            Err(_) => Err("Error while fetching data from horizon."),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_load_account() {
+        let s = Server::new(String::from("https://horizon.stellar.org"));
+
+        let tx = s
+            .load_account("GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM")
+            .unwrap();
+
+        assert_eq!(tx.id, tx.account_id);
+    }
+
+    #[test]
+    fn test_load_transaction() {
+        let s = Server::new(String::from("https://horizon.stellar.org"));
+
+        let tx = s
+            .load_transaction("3389e9f0f1a65f19736cacf544c2e825313e8447f569233bb8db39aa607c8889")
+            .unwrap();
+
+        assert_eq!(tx.id, tx.hash);
     }
 }

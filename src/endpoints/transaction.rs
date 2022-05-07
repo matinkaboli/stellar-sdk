@@ -38,6 +38,6 @@ pub struct Transaction {
     pub fee_meta_xdr: String,
     pub memo_type: String,
     pub signatures: Vec<String>,
-    pub valid_after: String,
-    pub valid_before: String,
+    pub valid_after: Option<String>,
+    pub valid_before: Option<String>,
 }
