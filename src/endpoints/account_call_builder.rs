@@ -1,20 +1,5 @@
 use crate::endpoints::{Account, Asset, Record, Server};
-use crate::utils::req;
-
-#[derive(Debug)]
-pub enum Order {
-    Asc,
-    Desc,
-}
-
-impl Order {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Order::Asc => "ASC",
-            Order::Desc => "DESC",
-        }
-    }
-}
+use crate::utils::{direction, req};
 
 #[derive(Debug)]
 pub struct AccountCallBuilder<'a> {
