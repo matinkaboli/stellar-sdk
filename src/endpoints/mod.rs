@@ -3,6 +3,7 @@ mod account_call_builder;
 mod asset;
 mod asset_call_builder;
 pub mod asset_horizon;
+pub mod call_builder;
 mod records;
 mod server;
 mod transaction;

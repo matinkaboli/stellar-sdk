@@ -1,52 +1,21 @@
-use crate::endpoints::{Account, Asset, Record, Server};
+use crate::endpoints::{call_builder::CallBuilder, Account, Asset, Record, Server};
 use crate::utils::{req, Direction};
 
 #[derive(Debug)]
 pub struct AccountCallBuilder<'a> {
     pub server: &'a Server,
     pub cursor: Option<String>,
-    pub sponsor: Option<String>,
     pub order: Option<Direction>,
     pub limit: Option<u8>,
     pub signer: Option<String>,
-    pub liquidity_pool: Option<String>,
+    pub sponsor: Option<String>,
     pub asset: Option<&'a Asset<'a>>,
+    pub liquidity_pool: Option<String>,
 }
 
 impl<'a> AccountCallBuilder<'a> {
-    pub fn new(s: &'a Server) -> Self {
-        AccountCallBuilder {
-            server: s,
-            cursor: None,
-            order: None,
-            sponsor: None,
-            limit: None,
-            signer: None,
-            liquidity_pool: None,
-            asset: None,
-        }
-    }
-
-    pub fn cursor(&mut self, c: &str) -> &mut Self {
-        self.cursor = Some(c.to_owned());
-
-        self
-    }
-
     pub fn sponsor(&mut self, s: &str) -> &mut Self {
         self.sponsor = Some(s.to_owned());
-
-        self
-    }
-
-    pub fn order(&mut self, o: Direction) -> &mut Self {
-        self.order = Some(o);
-
-        self
-    }
-
-    pub fn limit(&mut self, l: u8) -> &mut Self {
-        self.limit = Some(l);
 
         self
     }
@@ -68,45 +37,69 @@ impl<'a> AccountCallBuilder<'a> {
 
         self
     }
+}
 
-    pub fn call(&self) -> Result<Record<Account>, &str> {
-        let mut url = String::from(&self.server.0);
+impl<'a> CallBuilder<'a, Account> for AccountCallBuilder<'a> {
+    fn new(s: &'a Server) -> Self {
+        AccountCallBuilder {
+            server: s,
+            cursor: None,
+            order: None,
+            limit: None,
+            asset: None,
+            signer: None,
+            sponsor: None,
+            liquidity_pool: None,
+        }
+    }
 
-        url.push_str("/accounts?");
+    fn cursor(&mut self, c: &str) -> &mut Self {
+        self.cursor = Some(c.to_owned());
+
+        self
+    }
+
+    fn order(&mut self, o: Direction) -> &mut Self {
+        self.order = Some(o);
+
+        self
+    }
+
+    fn limit(&mut self, l: u8) -> &mut Self {
+        self.limit = Some(l);
+
+        self
+    }
+
+    fn call(&self) -> Result<Record<Account>, &str> {
+        let mut url = format!("{}{}", &self.server.0, "/accounts?");
 
         if let Some(x) = &self.cursor {
-            let s = format!("&cursor={}", x);
-            url.push_str(&s[..]);
-        }
-
-        if let Some(x) = &self.sponsor {
-            let s = format!("&sponsor={}", x);
-            url.push_str(&s[..]);
+            url.push_str(&format!("&cursor={}", x));
         }
 
         if let Some(x) = &self.order {
-            let s = format!("&order={}", x.as_str());
-            url.push_str(&s[..]);
+            url.push_str(&format!("&order={}", x.as_str()));
         }
 
         if let Some(x) = &self.limit {
-            let s = format!("&limit={}", x);
-            url.push_str(&s[..]);
+            url.push_str(&format!("&limit={}", x));
+        }
+
+        if let Some(x) = &self.sponsor {
+            url.push_str(&format!("&sponsor={}", x));
         }
 
         if let Some(x) = &self.signer {
-            let s = format!("&signer={}", x);
-            url.push_str(&s[..]);
+            url.push_str(&format!("&signer={}", x));
         }
 
         if let Some(x) = &self.liquidity_pool {
-            let s = format!("&liquidity_pool={}", x);
-            url.push_str(&s[..]);
+            url.push_str(&format!("&liquidity_pool={}", x));
         }
 
         if let Some(x) = &self.asset {
-            let s = format!("&asset={}", x.as_str());
-            url.push_str(&s[..]);
+            url.push_str(&format!("&asset={}", x.as_str()));
         }
 
         let resp = req(&url);
