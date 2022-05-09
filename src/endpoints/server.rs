@@ -1,6 +1,8 @@
 use serde_json;
 
-use crate::endpoints::{Account, AccountCallBuilder, Transaction, TransactionCallBuilder};
+use crate::endpoints::{
+    Account, AccountCallBuilder, AssetCallBuilder, Transaction, TransactionCallBuilder,
+};
 use crate::utils::{req, Endpoint};
 
 #[derive(Debug)]
@@ -9,6 +11,31 @@ pub struct Server(pub String);
 impl Server {
     pub fn new(network_id: String) -> Self {
         Server(network_id)
+    }
+
+    pub fn accounts(&self) -> AccountCallBuilder {
+        AccountCallBuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            sponsor: None,
+            limit: None,
+            signer: None,
+            liquidity_pool: None,
+            asset: None,
+        }
+    }
+
+    pub fn assets(&self) -> AssetCallBuilder {
+        AssetCallBuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            limit: None,
+            asset_code: None,
+            asset_issuer: None,
+            endpoint: Endpoint::None,
+        }
     }
 
     pub fn load_account(&self, account_id: &str) -> Result<Account, &str> {
@@ -22,19 +49,6 @@ impl Server {
                 Ok(p)
             }
             Err(_) => Err("Error while fetching data from horizon."),
-        }
-    }
-
-    pub fn accounts(&self) -> AccountCallBuilder {
-        AccountCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            sponsor: None,
-            limit: None,
-            signer: None,
-            liquidity_pool: None,
-            asset: None,
         }
     }
 
