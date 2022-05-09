@@ -6,12 +6,28 @@ impl<'a> Asset<'a> {
         Asset(code, issuer, false)
     }
 
+    pub fn native() -> Self {
+        Asset("XLM", "", true)
+    }
+
     pub fn as_str(&self) -> String {
+        if self.2 {
+            return String::from("XLM");
+        }
+
         format!("{}:{}", self.0, self.1)
     }
 
-    pub fn native() -> Self {
-        Asset("XLM", "", true)
+    pub fn get_type(&self) -> String {
+        if self.2 {
+            return String::from("native");
+        }
+
+        if self.1.len() <= 4 {
+            return String::from("credit_alphanum4");
+        }
+
+        String::from("credit_alphanum12")
     }
 }
 
@@ -64,5 +80,23 @@ mod tests {
         );
 
         assert!(usdc != aqua);
+    }
+
+    fn test_assets_type() {
+        let usdc = Asset::new(
+            "USDC",
+            "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+        );
+
+        let doget = Asset::new(
+            "DOGET",
+            "GDOEVDDBU6OBWKL7VHDAOKD77UP4DKHQYKOKJJT5PR3WRDBTX35HUEUX",
+        );
+
+        let xlm = Asset::native();
+
+        assert_eq!(xlm.get_type(), "native");
+        assert_eq!(usdc.get_type(), "credit_alphanum4");
+        assert_eq!(doget.get_type(), "credit_alphanum12");
     }
 }

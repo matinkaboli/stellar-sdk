@@ -1,48 +1,56 @@
-use crate::endpoints::{Record, Server, Transaction};
+use crate::endpoints::{asset_horizon, Record, Server};
 use crate::utils::{req, Direction, Endpoint};
 
 #[derive(Debug)]
-pub struct TransactionCallBuilder<'a> {
+pub struct AssetCallBuilder<'a> {
     pub server: &'a Server,
     pub cursor: Option<String>,
     pub order: Option<Direction>,
     pub limit: Option<u8>,
-    pub include_failed: bool,
+    pub asset_code: Option<String>,
+    pub asset_issuer: Option<String>,
     pub endpoint: Endpoint,
 }
 
-impl<'a> TransactionCallBuilder<'a> {
+impl<'a> AssetCallBuilder<'a> {
     pub fn new(s: &'a Server) -> Self {
-        Self {
+        AssetCallBuilder {
             server: s,
             cursor: None,
             order: None,
             limit: None,
-            include_failed: false,
+            asset_code: None,
+            asset_issuer: None,
             endpoint: Endpoint::None,
         }
     }
 
-    pub fn cursor(&mut self, c: &str) -> &mut Self {
-        self.cursor = Some(c.to_owned());
+    pub fn cursor(&mut self, cursor: &str) -> &mut Self {
+        self.cursor = Some(String::from(cursor));
 
         self
     }
 
-    pub fn order(&mut self, o: Direction) -> &mut Self {
-        self.order = Some(o);
+    pub fn order(&mut self, dir: Direction) -> &mut Self {
+        self.order = Some(dir);
 
         self
     }
 
-    pub fn limit(&mut self, l: u8) -> &mut Self {
-        self.limit = Some(l);
+    pub fn limit(&mut self, limit_number: u8) -> &mut Self {
+        self.limit = Some(limit_number);
 
         self
     }
 
-    pub fn include_failed(&mut self, i: bool) -> &mut Self {
-        self.include_failed = i;
+    pub fn asset_code(&mut self, code: &str) -> &mut Self {
+        self.asset_code = Some(String::from(code));
+
+        self
+    }
+
+    pub fn asset_issuer(&mut self, issuer: &str) -> &mut Self {
+        self.asset_issuer = Some(String::from(issuer));
 
         self
     }
@@ -53,13 +61,12 @@ impl<'a> TransactionCallBuilder<'a> {
         self
     }
 
-    pub fn call(&self) -> Result<Record<Transaction>, &str> {
+    pub fn call(&self) -> Result<Record<asset_horizon::AssetHorizon>, &str> {
         let mut url = String::from(format!(
-            "{}{}{}{}",
+            "{}{}{}",
             &self.server.0,
             self.endpoint.as_str(),
-            "/transactions?",
-            format!("&include_failed={}", self.include_failed),
+            "/assets?",
         ));
 
         if let Some(x) = &self.cursor {
@@ -81,7 +88,7 @@ impl<'a> TransactionCallBuilder<'a> {
 
         match resp {
             Ok(d) => {
-                let p: Record<Transaction> = serde_json::from_str(&d).unwrap();
+                let p: Record<asset_horizon::AssetHorizon> = serde_json::from_str(&d).unwrap();
 
                 Ok(p)
             }
@@ -95,19 +102,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn limit_transaction_call_builder() {
+    fn assets_horizon_test() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut tcb = TransactionCallBuilder::new(&s);
+        let mut acb = AssetCallBuilder::new(&s);
 
-        let tx_records = tcb
-            .for_endpoint(Endpoint::Accounts(String::from(
-                "GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM",
-            )))
-            .limit(1)
-            .call()
-            .unwrap();
+        let asset_records = acb.limit(3).call().unwrap();
 
-        assert_eq!(tx_records._embedded.records.len(), 1);
+        assert_eq!(asset_records._embedded.records.len(), 3);
     }
 }

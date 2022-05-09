@@ -1,13 +1,13 @@
 use crate::endpoints::{Account, Asset, Record, Server};
-use crate::utils::{direction, req};
+use crate::utils::{req, Direction};
 
 #[derive(Debug)]
 pub struct AccountCallBuilder<'a> {
     pub server: &'a Server,
     pub cursor: Option<String>,
     pub sponsor: Option<String>,
-    pub order: Option<Order>,
-    pub limit: Option<u32>,
+    pub order: Option<Direction>,
+    pub limit: Option<u8>,
     pub signer: Option<String>,
     pub liquidity_pool: Option<String>,
     pub asset: Option<&'a Asset<'a>>,
@@ -39,13 +39,13 @@ impl<'a> AccountCallBuilder<'a> {
         self
     }
 
-    pub fn order(&mut self, o: Order) -> &mut Self {
+    pub fn order(&mut self, o: Direction) -> &mut Self {
         self.order = Some(o);
 
         self
     }
 
-    pub fn limit(&mut self, l: u32) -> &mut Self {
+    pub fn limit(&mut self, l: u8) -> &mut Self {
         self.limit = Some(l);
 
         self

@@ -1,7 +1,7 @@
 use serde_json;
 
-use crate::endpoints::{Account, AccountCallBuilder, Transaction};
-use crate::utils::req;
+use crate::endpoints::{Account, AccountCallBuilder, Transaction, TransactionCallBuilder};
+use crate::utils::{req, Endpoint};
 
 #[derive(Debug)]
 pub struct Server(pub String);
@@ -49,6 +49,17 @@ impl Server {
                 Ok(p)
             }
             Err(_) => Err("Error while fetching data from horizon."),
+        }
+    }
+
+    pub fn transactions(&self) -> TransactionCallBuilder {
+        TransactionCallBuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            limit: None,
+            include_failed: false,
+            endpoint: Endpoint::None,
         }
     }
 }
