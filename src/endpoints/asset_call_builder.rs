@@ -24,12 +24,6 @@ impl<'a> AssetCallBuilder<'a> {
 
         self
     }
-
-    pub fn for_endpoint(&mut self, endpoint: Endpoint) -> &mut Self {
-        self.endpoint = endpoint;
-
-        self
-    }
 }
 
 impl<'a> CallBuilder<'a, asset_horizon::AssetHorizon> for AssetCallBuilder<'a> {
@@ -59,6 +53,12 @@ impl<'a> CallBuilder<'a, asset_horizon::AssetHorizon> for AssetCallBuilder<'a> {
 
     fn limit(&mut self, limit_number: u8) -> &mut Self {
         self.limit = Some(limit_number);
+
+        self
+    }
+
+    fn for_endpoint(&mut self, endpoint: Endpoint) -> &mut Self {
+        self.endpoint = endpoint;
 
         self
     }

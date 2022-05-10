@@ -23,6 +23,7 @@ impl Server {
             signer: None,
             liquidity_pool: None,
             asset: None,
+            endpoint: Endpoint::None,
         }
     }
 

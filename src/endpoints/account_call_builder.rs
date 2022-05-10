@@ -1,5 +1,5 @@
 use crate::endpoints::{call_builder::CallBuilder, Account, Asset, Record, Server};
-use crate::utils::{req, Direction};
+use crate::utils::{req, Direction, Endpoint};
 
 #[derive(Debug)]
 pub struct AccountCallBuilder<'a> {
@@ -11,6 +11,7 @@ pub struct AccountCallBuilder<'a> {
     pub sponsor: Option<String>,
     pub asset: Option<&'a Asset<'a>>,
     pub liquidity_pool: Option<String>,
+    pub endpoint: Endpoint,
 }
 
 impl<'a> AccountCallBuilder<'a> {
@@ -50,6 +51,7 @@ impl<'a> CallBuilder<'a, Account> for AccountCallBuilder<'a> {
             signer: None,
             sponsor: None,
             liquidity_pool: None,
+            endpoint: Endpoint::None,
         }
     }
 
@@ -67,6 +69,12 @@ impl<'a> CallBuilder<'a, Account> for AccountCallBuilder<'a> {
 
     fn limit(&mut self, l: u8) -> &mut Self {
         self.limit = Some(l);
+
+        self
+    }
+
+    fn for_endpoint(&mut self, endpoint: Endpoint) -> &mut Self {
+        self.endpoint = endpoint;
 
         self
     }
