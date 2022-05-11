@@ -1,4 +1,4 @@
-use crate::endpoints::{Record, Server, Transaction};
+use crate::endpoints::{call_builder::CallBuilder, Record, Server, Transaction};
 use crate::utils::{req, Direction, Endpoint};
 
 #[derive(Debug)]
@@ -11,8 +11,8 @@ pub struct TransactionCallBuilder<'a> {
     pub endpoint: Endpoint,
 }
 
-impl<'a> TransactionCallBuilder<'a> {
-    pub fn new(s: &'a Server) -> Self {
+impl<'a> CallBuilder<'a, Transaction> for TransactionCallBuilder<'a> {
+    fn new(s: &'a Server) -> Self {
         Self {
             server: s,
             cursor: None,
@@ -23,37 +23,31 @@ impl<'a> TransactionCallBuilder<'a> {
         }
     }
 
-    pub fn cursor(&mut self, c: &str) -> &mut Self {
+    fn cursor(&mut self, c: &str) -> &mut Self {
         self.cursor = Some(c.to_owned());
 
         self
     }
 
-    pub fn order(&mut self, o: Direction) -> &mut Self {
+    fn order(&mut self, o: Direction) -> &mut Self {
         self.order = Some(o);
 
         self
     }
 
-    pub fn limit(&mut self, l: u8) -> &mut Self {
+    fn limit(&mut self, l: u8) -> &mut Self {
         self.limit = Some(l);
 
         self
     }
 
-    pub fn include_failed(&mut self, i: bool) -> &mut Self {
-        self.include_failed = i;
-
-        self
-    }
-
-    pub fn for_endpoint(&mut self, endpoint: Endpoint) -> &mut Self {
+    fn for_endpoint(&mut self, endpoint: Endpoint) -> &mut Self {
         self.endpoint = endpoint;
 
         self
     }
 
-    pub fn call(&self) -> Result<Record<Transaction>, &str> {
+    fn call(&self) -> Result<Record<Transaction>, &str> {
         let mut url = String::from(format!(
             "{}{}{}{}",
             &self.server.0,
@@ -87,6 +81,14 @@ impl<'a> TransactionCallBuilder<'a> {
             }
             Err(_) => Err("Error while fetching data from horizon."),
         }
+    }
+}
+
+impl<'a> TransactionCallBuilder<'a> {
+    pub fn include_failed(&mut self, i: bool) -> &mut Self {
+        self.include_failed = i;
+
+        self
     }
 }
 
