@@ -1,3 +1,6 @@
+use crate::endpoints::records::TemplateLink;
+use serde::{Deserialize, Serialize};
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct EffectLinks {
     #[serde(rename(serialize = "self", deserialize = "self"))]
@@ -20,13 +23,13 @@ pub struct Effect {
     paging_token: String,
     account: String,
     r#type: String,
-    type_i: String,
+    type_i: u8,
     created_at: String,
 
     starting_balance: Option<String>,
     asset_type: Option<String>,
     amount: Option<String>,
-    weight: Option<String>,
+    weight: Option<u32>,
     public_key: Option<String>,
     key: Option<String>,
     low_threshold: Option<u8>,
@@ -56,5 +59,5 @@ pub struct Effect {
     shares_redeemed: Option<String>,
     liquidity_pool: Option<String>,
     shares_revoked: Option<String>,
-    reserves_revoked: Vec<ReservesRevoked>,
+    reserves_revoked: Option<Vec<ReservesRevoked>>,
 }

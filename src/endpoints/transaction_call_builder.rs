@@ -106,10 +106,10 @@ mod tests {
             .for_endpoint(Endpoint::Accounts(String::from(
                 "GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM",
             )))
-            .limit(1)
+            .limit(200)
             .call()
             .unwrap();
 
-        assert_eq!(tx_records._embedded.records.len(), 1);
+        assert_eq!(tx_records._embedded.records.len(), 200);
     }
 }
