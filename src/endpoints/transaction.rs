@@ -17,8 +17,8 @@ pub struct TransactionLinks {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Transaction {
-    pub memo: String,
-    pub memo_bytes: String,
+    pub memo: Option<String>,
+    pub memo_bytes: Option<String>,
     pub _links: TransactionLinks,
     pub id: String,
     pub paging_token: String,
