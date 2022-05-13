@@ -82,18 +82,6 @@ impl Account {
 
         self.sequence = new_sequence;
     }
-
-    pub fn transactions(&self) {}
-
-    pub fn operations(&self) {}
-
-    pub fn payments(&self) {}
-
-    pub fn effects(&self) {}
-
-    pub fn offers(&self) {}
-
-    pub fn trades(&self) {}
 }
 
 #[cfg(test)]
