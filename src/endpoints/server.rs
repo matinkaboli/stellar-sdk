@@ -1,7 +1,8 @@
 use serde_json;
 
 use crate::endpoints::{
-    Account, AccountCallBuilder, AssetCallBuilder, Transaction, TransactionCallBuilder,
+    fee_stats::FeeStats, ledger_call_builder::LedgerCallBuilder, Account, AccountCallBuilder,
+    AssetCallBuilder, Ledger, Transaction, TransactionCallBuilder,
 };
 use crate::utils::{req, Endpoint};
 
@@ -41,30 +42,20 @@ impl Server {
 
     pub fn load_account(&self, account_id: &str) -> Result<Account, &str> {
         let url = format!("{}/accounts/{}", self.0, account_id);
-        let resp = req(&url);
+        let resp = req(&url).unwrap();
 
-        match resp {
-            Ok(d) => {
-                let p: Account = serde_json::from_str(&d).unwrap();
+        let parsed: Account = serde_json::from_str(&resp).unwrap();
 
-                Ok(p)
-            }
-            Err(_) => Err("Error while fetching data from horizon."),
-        }
+        Ok(parsed)
     }
 
     pub fn load_transaction(&self, hash: &str) -> Result<Transaction, &str> {
         let url = format!("{}/transactions/{}", self.0, hash);
-        let resp = req(&url);
+        let resp = req(&url).unwrap();
 
-        match resp {
-            Ok(d) => {
-                let p: Transaction = serde_json::from_str(&d).unwrap();
+        let parsed: Transaction = serde_json::from_str(&resp).unwrap();
 
-                Ok(p)
-            }
-            Err(_) => Err("Error while fetching data from horizon."),
-        }
+        Ok(parsed)
     }
 
     pub fn transactions(&self) -> TransactionCallBuilder {
@@ -76,6 +67,34 @@ impl Server {
             include_failed: false,
             endpoint: Endpoint::None,
         }
+    }
+
+    pub fn load_ledger(&self, sequence: u64) -> Result<Ledger, &str> {
+        let url = format!("{}/ledgers/{}", self.0, sequence);
+        let resp = req(&url).unwrap();
+
+        let parsed: Ledger = serde_json::from_str(&resp).unwrap();
+
+        Ok(parsed)
+    }
+
+    pub fn ledgers(&self) -> LedgerCallBuilder {
+        LedgerCallBuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            limit: None,
+            endpoint: Endpoint::None,
+        }
+    }
+
+    pub fn fee_stats(&self) -> Result<FeeStats, &str> {
+        let url = format!("{}/fee_stats", self.0);
+        let resp = req(&url).unwrap();
+
+        let parsed: FeeStats = serde_json::from_str(&resp).unwrap();
+
+        Ok(parsed)
     }
 }
 
@@ -103,5 +122,22 @@ mod tests {
             .unwrap();
 
         assert_eq!(tx.id, tx.hash);
+    }
+
+    #[test]
+    fn test_load_ledger() {
+        let s = Server::new(String::from("https://horizon.stellar.org"));
+
+        let ledger3 = s.load_ledger(3).unwrap();
+        let ledger4 = s.load_ledger(4).unwrap();
+
+        assert_eq!(ledger3.hash, ledger4.prev_hash);
+    }
+
+    #[test]
+    fn test_load_fee_stats() {
+        let s = Server::new(String::from("https://horizon.stellar.org"));
+
+        let _fee_stats = s.fee_stats().unwrap();
     }
 }

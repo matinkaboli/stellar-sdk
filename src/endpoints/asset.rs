@@ -23,11 +23,18 @@ impl<'a> Asset<'a> {
             return String::from("native");
         }
 
-        if self.1.len() <= 4 {
+        if self.0.len() <= 4 {
             return String::from("credit_alphanum4");
         }
 
         String::from("credit_alphanum12")
+    }
+
+    pub fn from_str(ast: &'a str) -> Self {
+        let splitted = ast.split(":");
+        let vec: Vec<&str> = splitted.collect();
+
+        Self(vec[0], vec[1], false)
     }
 }
 
@@ -82,10 +89,11 @@ mod tests {
         assert!(usdc != aqua);
     }
 
+    #[test]
     fn test_assets_type() {
-        let usdc = Asset::new(
-            "USDC",
-            "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+        let rbt = Asset::new(
+            "RBT",
+            "GBSQR5CTKWYQXDGB2KHPB4IZL2FO4KVOWH72WEUSZII7Q32HGGIPSOYS",
         );
 
         let doget = Asset::new(
@@ -96,7 +104,16 @@ mod tests {
         let xlm = Asset::native();
 
         assert_eq!(xlm.get_type(), "native");
-        assert_eq!(usdc.get_type(), "credit_alphanum4");
+        assert_eq!(rbt.get_type(), "credit_alphanum4");
         assert_eq!(doget.get_type(), "credit_alphanum12");
+    }
+
+    #[test]
+    fn test_asset_from_str() {
+        let asset_str = "VELO:GDM4RQUQQUVSKQA7S6EM7XBZP3FCGH4Q7CL6TABQ7B2BEJ5ERARM2M5M";
+
+        let asset = Asset::from_str(asset_str);
+
+        assert_eq!(asset.as_str(), asset_str);
     }
 }
