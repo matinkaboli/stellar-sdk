@@ -23,20 +23,20 @@ impl<'a> CallBuilder<'a, Transaction> for TransactionCallBuilder<'a> {
         }
     }
 
-    fn cursor(&mut self, c: &str) -> &mut Self {
-        self.cursor = Some(c.to_owned());
+    fn cursor(&mut self, cursor: &str) -> &mut Self {
+        self.cursor = Some(String::from(cursor));
 
         self
     }
 
-    fn order(&mut self, o: Direction) -> &mut Self {
-        self.order = Some(o);
+    fn order(&mut self, dir: Direction) -> &mut Self {
+        self.order = Some(dir);
 
         self
     }
 
-    fn limit(&mut self, l: u8) -> &mut Self {
-        self.limit = Some(l);
+    fn limit(&mut self, limit: u8) -> &mut Self {
+        self.limit = Some(limit);
 
         self
     }
@@ -48,39 +48,31 @@ impl<'a> CallBuilder<'a, Transaction> for TransactionCallBuilder<'a> {
     }
 
     fn call(&self) -> Result<Record<Transaction>, &str> {
-        let mut url = String::from(format!(
+        let mut url = format!(
             "{}{}{}{}",
             &self.server.0,
             self.endpoint.as_str(),
             "/transactions?",
             format!("&include_failed={}", self.include_failed),
-        ));
+        );
 
         if let Some(x) = &self.cursor {
-            let s = format!("&cursor={}", x);
-            url.push_str(&s[..]);
+            url.push_str(&format!("&cursor={}", x));
         }
 
         if let Some(x) = &self.order {
-            let s = format!("&order={}", x.as_str());
-            url.push_str(&s[..]);
+            url.push_str(&format!("&order={}", x.as_str()));
         }
 
         if let Some(x) = &self.limit {
-            let s = format!("&limit={}", x);
-            url.push_str(&s[..]);
+            url.push_str(&format!("&limit={}", x));
         }
 
-        let resp = req(&url);
+        let resp = req(&url).unwrap();
 
-        match resp {
-            Ok(d) => {
-                let p: Record<Transaction> = serde_json::from_str(&d).unwrap();
+        let p: Record<Transaction> = serde_json::from_str(&resp).unwrap();
 
-                Ok(p)
-            }
-            Err(_) => Err("Error while fetching data from horizon."),
-        }
+        Ok(p)
     }
 }
 

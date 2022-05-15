@@ -15,26 +15,26 @@ pub struct AccountCallBuilder<'a> {
 }
 
 impl<'a> AccountCallBuilder<'a> {
-    pub fn sponsor(&mut self, s: &str) -> &mut Self {
-        self.sponsor = Some(s.to_owned());
+    pub fn sponsor(&mut self, sponsor: &str) -> &mut Self {
+        self.sponsor = Some(String::from(sponsor));
 
         self
     }
 
-    pub fn signer(&mut self, s: &str) -> &mut Self {
-        self.signer = Some(s.to_owned());
+    pub fn signer(&mut self, signer: &str) -> &mut Self {
+        self.signer = Some(String::from(signer));
 
         self
     }
 
-    pub fn liquidity_pool(&mut self, l: &str) -> &mut Self {
-        self.liquidity_pool = Some(l.to_owned());
+    pub fn liquidity_pool(&mut self, liquidity_id: &str) -> &mut Self {
+        self.liquidity_pool = Some(String::from(liquidity_id));
 
         self
     }
 
-    pub fn asset(&mut self, a: &'a Asset) -> &mut Self {
-        self.asset = Some(a);
+    pub fn asset(&mut self, asset: &'a Asset) -> &mut Self {
+        self.asset = Some(asset);
 
         self
     }
@@ -55,8 +55,8 @@ impl<'a> CallBuilder<'a, Account> for AccountCallBuilder<'a> {
         }
     }
 
-    fn cursor(&mut self, c: &str) -> &mut Self {
-        self.cursor = Some(c.to_owned());
+    fn cursor(&mut self, cursor: &str) -> &mut Self {
+        self.cursor = Some(String::from(cursor));
 
         self
     }
@@ -67,8 +67,8 @@ impl<'a> CallBuilder<'a, Account> for AccountCallBuilder<'a> {
         self
     }
 
-    fn limit(&mut self, l: u8) -> &mut Self {
-        self.limit = Some(l);
+    fn limit(&mut self, limit: u8) -> &mut Self {
+        self.limit = Some(limit);
 
         self
     }
@@ -110,16 +110,11 @@ impl<'a> CallBuilder<'a, Account> for AccountCallBuilder<'a> {
             url.push_str(&format!("&asset={}", x.as_str()));
         }
 
-        let resp = req(&url);
+        let resp = req(&url).unwrap();
 
-        match resp {
-            Ok(d) => {
-                let p: Record<Account> = serde_json::from_str(&d).unwrap();
+        let p: Record<Account> = serde_json::from_str(&resp).unwrap();
 
-                Ok(p)
-            }
-            Err(_) => Err("Error while fetching data from horizon."),
-        }
+        Ok(p)
     }
 }
 

@@ -2,9 +2,11 @@ use serde_json;
 
 use crate::endpoints::{
     fee_stats::FeeStats, ledger_call_builder::LedgerCallBuilder, Account, AccountCallBuilder,
-    AssetCallBuilder, Ledger, Transaction, TransactionCallBuilder,
+    AssetCallBuilder, Ledger, Offer, Transaction, TransactionCallBuilder,
 };
 use crate::utils::{req, Endpoint};
+
+use super::OfferCallBuilder;
 
 #[derive(Debug)]
 pub struct Server(pub String);
@@ -84,6 +86,29 @@ impl Server {
             cursor: None,
             order: None,
             limit: None,
+            endpoint: Endpoint::None,
+        }
+    }
+
+    pub fn load_offer(&self, offer_id: &str) -> Result<Offer, &str> {
+        let url = format!("{}/offers/{}", self.0, offer_id);
+        let resp = req(&url).unwrap();
+
+        let parsed: Offer = serde_json::from_str(&resp).unwrap();
+
+        Ok(parsed)
+    }
+
+    pub fn offers(&self) -> OfferCallBuilder {
+        OfferCallBuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            limit: None,
+            buying: None,
+            seller: None,
+            selling: None,
+            sponsor: None,
             endpoint: Endpoint::None,
         }
     }

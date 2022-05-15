@@ -65,16 +65,11 @@ impl<'a> CallBuilder<'a, Effect> for EffectCallBuilder<'a> {
             url.push_str(&format!("&limit={}", x));
         }
 
-        let resp = req(&url);
+        let resp = req(&url).unwrap();
 
-        match resp {
-            Ok(d) => {
-                let p: Record<Effect> = serde_json::from_str(&d).unwrap();
+        let p: Record<Effect> = serde_json::from_str(&resp).unwrap();
 
-                Ok(p)
-            }
-            Err(_) => Err("Error while fetching data from horizon."),
-        }
+        Ok(p)
     }
 }
 

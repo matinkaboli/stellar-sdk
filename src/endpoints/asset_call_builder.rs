@@ -45,8 +45,8 @@ impl<'a> CallBuilder<'a, asset_horizon::AssetHorizon> for AssetCallBuilder<'a> {
         self
     }
 
-    fn order(&mut self, dir: Direction) -> &mut Self {
-        self.order = Some(dir);
+    fn order(&mut self, o: Direction) -> &mut Self {
+        self.order = Some(o);
 
         self
     }
@@ -91,16 +91,11 @@ impl<'a> CallBuilder<'a, asset_horizon::AssetHorizon> for AssetCallBuilder<'a> {
             url.push_str(&format!("&asset_issuer={}", x));
         }
 
-        let resp = req(&url);
+        let resp = req(&url).unwrap();
 
-        match resp {
-            Ok(d) => {
-                let p: Record<asset_horizon::AssetHorizon> = serde_json::from_str(&d).unwrap();
+        let p: Record<asset_horizon::AssetHorizon> = serde_json::from_str(&resp).unwrap();
 
-                Ok(p)
-            }
-            Err(_) => Err("Error while fetching data from horizon."),
-        }
+        Ok(p)
     }
 }
 

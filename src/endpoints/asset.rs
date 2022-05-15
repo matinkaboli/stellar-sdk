@@ -12,7 +12,7 @@ impl<'a> Asset<'a> {
 
     pub fn as_str(&self) -> String {
         if self.2 {
-            return String::from("XLM");
+            return String::from("native");
         }
 
         format!("{}:{}", self.0, self.1)

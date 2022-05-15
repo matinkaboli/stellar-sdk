@@ -46,12 +46,12 @@ impl<'a> CallBuilder<'a, Ledger> for LedgerCallBuilder<'a> {
     }
 
     fn call(&self) -> Result<Record<Ledger>, &str> {
-        let mut url = String::from(format!(
+        let mut url = format!(
             "{}{}{}",
             &self.server.0,
             self.endpoint.as_str(),
             "/ledgers?",
-        ));
+        );
 
         if let Some(x) = &self.cursor {
             url.push_str(&format!("&cursor={}", x));
@@ -65,16 +65,11 @@ impl<'a> CallBuilder<'a, Ledger> for LedgerCallBuilder<'a> {
             url.push_str(&format!("&limit={}", x));
         }
 
-        let resp = req(&url);
+        let resp = req(&url).unwrap();
 
-        match resp {
-            Ok(d) => {
-                let p: Record<Ledger> = serde_json::from_str(&d).unwrap();
+        let p: Record<Ledger> = serde_json::from_str(&resp).unwrap();
 
-                Ok(p)
-            }
-            Err(_) => Err("Error while fetching data from horizon."),
-        }
+        Ok(p)
     }
 }
 
