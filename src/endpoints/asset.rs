@@ -114,6 +114,6 @@ mod tests {
 
         let asset = Asset::from_str(asset_str);
 
-        assert_eq!(asset.as_str(), asset_str);
+        assert_eq!(asset_str, asset.as_str());
     }
 }
