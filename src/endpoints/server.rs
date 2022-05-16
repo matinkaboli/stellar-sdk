@@ -4,8 +4,10 @@ use crate::endpoints::{
     AccountCallBuilder, AssetCallBuilder, LedgerCallBuilder, OfferCallBuilder,
     OperationCallBuilder, PaymentCallBuilder, TransactionCallBuilder,
 };
-use crate::types::{Account, FeeStats, Ledger, Offer, Operation, Transaction};
+use crate::types::{Account, FeeStats, Ledger, LiquidityPool, Offer, Operation, Transaction};
 use crate::utils::{req, Endpoint};
+
+use super::LiquidityPoolCallBuilder;
 
 #[derive(Debug)]
 pub struct Server(pub String);
@@ -13,6 +15,15 @@ pub struct Server(pub String);
 impl Server {
     pub fn new(network_id: String) -> Self {
         Server(network_id)
+    }
+
+    pub fn load_account(&self, account_id: &str) -> Result<Account, &str> {
+        let url = format!("{}/accounts/{}", self.0, account_id);
+        let resp = req(&url).unwrap();
+
+        let parsed: Account = serde_json::from_str(&resp).unwrap();
+
+        Ok(parsed)
     }
 
     pub fn accounts(&self) -> AccountCallBuilder {
@@ -27,27 +38,6 @@ impl Server {
             asset: None,
             endpoint: Endpoint::None,
         }
-    }
-
-    pub fn assets(&self) -> AssetCallBuilder {
-        AssetCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            limit: None,
-            asset_code: None,
-            asset_issuer: None,
-            endpoint: Endpoint::None,
-        }
-    }
-
-    pub fn load_account(&self, account_id: &str) -> Result<Account, &str> {
-        let url = format!("{}/accounts/{}", self.0, account_id);
-        let resp = req(&url).unwrap();
-
-        let parsed: Account = serde_json::from_str(&resp).unwrap();
-
-        Ok(parsed)
     }
 
     pub fn load_transaction(&self, hash: &str) -> Result<Transaction, &str> {
@@ -112,16 +102,6 @@ impl Server {
         }
     }
 
-    pub fn payments(&self) -> PaymentCallBuilder {
-        PaymentCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            limit: None,
-            endpoint: Endpoint::None,
-        }
-    }
-
     pub fn load_operation(&self, operation_id: &str) -> Result<Operation, &str> {
         let url = format!("{}/operations/{}", self.0, operation_id);
         let resp = req(&url).unwrap();
@@ -139,6 +119,48 @@ impl Server {
             limit: None,
             endpoint: Endpoint::None,
             include_failed: false,
+        }
+    }
+
+    pub fn load_liquidity_pool(&self, liquidity_pool_id: &str) -> Result<LiquidityPool, &str> {
+        let url = format!("{}/liquidity_pools/{}", self.0, liquidity_pool_id);
+        let resp = req(&url).unwrap();
+
+        let parsed: LiquidityPool = serde_json::from_str(&resp).unwrap();
+
+        Ok(parsed)
+    }
+
+    pub fn liquidity_pools(&self) -> LiquidityPoolCallBuilder {
+        LiquidityPoolCallBuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            limit: None,
+            assets: None,
+            endpoint: Endpoint::None,
+        }
+    }
+
+    pub fn payments(&self) -> PaymentCallBuilder {
+        PaymentCallBuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            limit: None,
+            endpoint: Endpoint::None,
+        }
+    }
+
+    pub fn assets(&self) -> AssetCallBuilder {
+        AssetCallBuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            limit: None,
+            asset_code: None,
+            asset_issuer: None,
+            endpoint: Endpoint::None,
         }
     }
 
