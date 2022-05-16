@@ -151,7 +151,5 @@ mod tests {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
         let records = s.trades().for_type(TradeType::Orderbook).call().unwrap();
-
-        println!("{:#?}", records);
     }
 }

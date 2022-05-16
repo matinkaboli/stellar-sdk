@@ -8,6 +8,7 @@ mod ledger;
 mod liquidity_pool;
 mod offer;
 mod operation;
+mod order_book;
 mod trade;
 mod transaction;
 
@@ -21,5 +22,6 @@ pub use ledger::Ledger;
 pub use liquidity_pool::LiquidityPool;
 pub use offer::Offer;
 pub use operation::Operation;
+pub use order_book::OrderBook;
 pub use trade::Trade;
 pub use transaction::Transaction;

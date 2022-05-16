@@ -5,11 +5,13 @@ use crate::endpoints::{
     OperationCallBuilder, PaymentCallBuilder, TransactionCallBuilder,
 };
 use crate::types::{
-    Account, FeeStats, Ledger, LiquidityPool, Offer, Operation, Trade, Transaction,
+    Account, Asset, ClaimableBalance, FeeStats, Ledger, LiquidityPool, Offer, Operation,
+    Transaction,
 };
 use crate::utils::{req, Endpoint};
 
-use super::{LiquidityPoolCallBuilder, TradeCallBuilder};
+use super::order_book_call_builder::OrderBookCallBuilder;
+use super::{ClaimableBalanceCallbuilder, LiquidityPoolCallBuilder, TradeCallBuilder};
 
 #[derive(Debug)]
 pub struct Server(pub String);
@@ -144,6 +146,39 @@ impl Server {
         }
     }
 
+    pub fn load_claimable_balance(
+        &self,
+        claimable_balance_id: &str,
+    ) -> Result<ClaimableBalance, &str> {
+        let url = format!("{}/claimable_balances/{}", self.0, claimable_balance_id);
+        let resp = req(&url).unwrap();
+
+        let parsed: ClaimableBalance = serde_json::from_str(&resp).unwrap();
+
+        Ok(parsed)
+    }
+
+    pub fn claimable_balances(&self) -> ClaimableBalanceCallbuilder {
+        ClaimableBalanceCallbuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            limit: None,
+            endpoint: Endpoint::None,
+            sponsor: None,
+            asset: None,
+            claimant: None,
+        }
+    }
+
+    pub fn order_books<'a>(&self, selling: Asset, buying: Asset) -> OrderBookCallBuilder {
+        OrderBookCallBuilder {
+            server: self,
+            limit: None,
+            selling: &selling,
+            buying: &buying,
+        }
+    }
     pub fn trades(&self) -> TradeCallBuilder {
         TradeCallBuilder {
             server: self,
