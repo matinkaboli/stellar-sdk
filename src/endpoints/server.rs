@@ -171,6 +171,10 @@ impl Server {
         }
     }
 
+    /*
+     *
+     *
+
     pub fn order_books<'a>(&self, selling: Asset, buying: Asset) -> OrderBookCallBuilder {
         OrderBookCallBuilder {
             server: self,
@@ -179,6 +183,9 @@ impl Server {
             buying: &buying,
         }
     }
+     *
+     */
+
     pub fn trades(&self) -> TradeCallBuilder {
         TradeCallBuilder {
             server: self,
