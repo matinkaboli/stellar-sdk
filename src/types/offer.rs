@@ -24,7 +24,7 @@ pub struct Offer {
     pub selling: OfferAsset,
     pub buying: OfferAsset,
     pub amount: String,
-    pub price_r: PriceRShortHand,
+    pub price_r: PriceRShortHand<u32>,
     pub price: String,
     pub last_modified_ledger: u64,
     pub last_modified_time: String,

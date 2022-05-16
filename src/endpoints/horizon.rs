@@ -77,9 +77,9 @@ pub struct PriceR {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct PriceRShortHand {
-    pub n: u32,
-    pub d: u32,
+pub struct PriceRShortHand<T> {
+    pub n: T,
+    pub d: T,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

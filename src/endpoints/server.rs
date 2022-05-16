@@ -4,10 +4,12 @@ use crate::endpoints::{
     AccountCallBuilder, AssetCallBuilder, LedgerCallBuilder, OfferCallBuilder,
     OperationCallBuilder, PaymentCallBuilder, TransactionCallBuilder,
 };
-use crate::types::{Account, FeeStats, Ledger, LiquidityPool, Offer, Operation, Transaction};
+use crate::types::{
+    Account, FeeStats, Ledger, LiquidityPool, Offer, Operation, Trade, Transaction,
+};
 use crate::utils::{req, Endpoint};
 
-use super::LiquidityPoolCallBuilder;
+use super::{LiquidityPoolCallBuilder, TradeCallBuilder};
 
 #[derive(Debug)]
 pub struct Server(pub String);
@@ -142,6 +144,19 @@ impl Server {
         }
     }
 
+    pub fn trades(&self) -> TradeCallBuilder {
+        TradeCallBuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            limit: None,
+            endpoint: Endpoint::None,
+            asset_pair: None,
+            offer: None,
+            for_type: None,
+        }
+    }
+
     pub fn payments(&self) -> PaymentCallBuilder {
         PaymentCallBuilder {
             server: self,
@@ -243,5 +258,14 @@ mod tests {
             .unwrap();
 
         assert_eq!(my_ops._embedded.records.len(), 2);
+    }
+
+    #[test]
+    fn test_load_trade() {
+        let s = Server::new(String::from("https://horizon.stellar.org"));
+
+        let my_trade = s.trades().for_offer("4").call().unwrap();
+
+        assert_ne!("4", my_trade._embedded.records[0].base_offer_id)
     }
 }

@@ -36,6 +36,22 @@ impl<'a> Asset<'a> {
 
         Self(vec[0], vec[1], false)
     }
+
+    pub fn as_querystring(&self, name: String) -> String {
+        if self.get_type() == "native" {
+            return format!("&{}_asset_type={}", name, "native");
+        }
+
+        format!(
+            "&{}_asset_type={}&{}_asset_code={}&{}_asset_issuer={}",
+            name,
+            self.get_type(),
+            name,
+            self.0,
+            name,
+            self.1,
+        )
+    }
 }
 
 impl<'a> Eq for Asset<'a> {}
@@ -115,5 +131,25 @@ mod tests {
         let asset = Asset::from_str(asset_str);
 
         assert_eq!(asset_str, asset.as_str());
+    }
+
+    #[test]
+    fn test_asset_as_querystring() {
+        let native = Asset::native();
+        let qs = native.as_querystring(String::from("base"));
+
+        assert_eq!("&base_asset_type=native", qs);
+
+        let y_usdc = Asset::new(
+            "yUSDC",
+            "GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
+        );
+
+        let qs = y_usdc.as_querystring(String::from("counter"));
+
+        assert_eq!(
+            "&counter_asset_type=credit_alphanum12&counter_asset_code=yUSDC&counter_asset_issuer=GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
+             qs
+        );
     }
 }

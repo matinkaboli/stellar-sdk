@@ -9,6 +9,7 @@ mod offer_call_builder;
 mod operation_call_builder;
 mod payment_call_builder;
 mod server;
+mod trade_call_builder;
 mod transaction_call_builder;
 
 pub use account_call_builder::AccountCallBuilder;
@@ -21,4 +22,5 @@ pub use offer_call_builder::OfferCallBuilder;
 pub use operation_call_builder::OperationCallBuilder;
 pub use payment_call_builder::PaymentCallBuilder;
 pub use server::Server;
+pub use trade_call_builder::TradeCallBuilder;
 pub use transaction_call_builder::TransactionCallBuilder;
