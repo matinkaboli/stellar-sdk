@@ -1,12 +1,11 @@
 use serde_json;
 
 use crate::endpoints::{
-    fee_stats::FeeStats, ledger_call_builder::LedgerCallBuilder, Account, AccountCallBuilder,
-    AssetCallBuilder, Ledger, Offer, Transaction, TransactionCallBuilder,
+    AccountCallBuilder, AssetCallBuilder, LedgerCallBuilder, OfferCallBuilder,
+    OperationCallBuilder, PaymentCallBuilder, TransactionCallBuilder,
 };
+use crate::types::{Account, FeeStats, Ledger, Offer, Operation, Transaction};
 use crate::utils::{req, Endpoint};
-
-use super::OfferCallBuilder;
 
 #[derive(Debug)]
 pub struct Server(pub String);
@@ -113,6 +112,36 @@ impl Server {
         }
     }
 
+    pub fn payments(&self) -> PaymentCallBuilder {
+        PaymentCallBuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            limit: None,
+            endpoint: Endpoint::None,
+        }
+    }
+
+    pub fn load_operation(&self, operation_id: &str) -> Result<Operation, &str> {
+        let url = format!("{}/operations/{}", self.0, operation_id);
+        let resp = req(&url).unwrap();
+
+        let parsed: Operation = serde_json::from_str(&resp).unwrap();
+
+        Ok(parsed)
+    }
+
+    pub fn operations(&self) -> OperationCallBuilder {
+        OperationCallBuilder {
+            server: self,
+            cursor: None,
+            order: None,
+            limit: None,
+            endpoint: Endpoint::None,
+            include_failed: false,
+        }
+    }
+
     pub fn fee_stats(&self) -> Result<FeeStats, &str> {
         let url = format!("{}/fee_stats", self.0);
         let resp = req(&url).unwrap();
@@ -125,6 +154,8 @@ impl Server {
 
 #[cfg(test)]
 mod tests {
+    use crate::endpoints::call_builder::CallBuilder;
+
     use super::*;
 
     #[test]
@@ -164,5 +195,31 @@ mod tests {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
         let _fee_stats = s.fee_stats().unwrap();
+    }
+
+    #[test]
+    fn load_operation() {
+        let s = Server::new(String::from("https://horizon.stellar.org"));
+
+        let op = s.load_operation("33676838572033").unwrap();
+
+        assert_eq!(op.id, op.paging_token);
+    }
+
+    #[test]
+    fn load_some_operations() {
+        let s = Server::new(String::from("https://horizon.stellar.org"));
+
+        let my_account = "GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM";
+
+        let my_ops = s
+            .operations()
+            .include_failed(true)
+            .for_endpoint(Endpoint::Accounts(String::from(my_account)))
+            .limit(2)
+            .call()
+            .unwrap();
+
+        assert_eq!(my_ops._embedded.records.len(), 2);
     }
 }

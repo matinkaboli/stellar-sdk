@@ -1,4 +1,4 @@
-use crate::endpoints::{Record, Server};
+use crate::endpoints::{horizon::Record, Server};
 use crate::utils::{Direction, Endpoint};
 
 pub trait CallBuilder<'a, T> {

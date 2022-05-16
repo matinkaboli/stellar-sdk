@@ -1,4 +1,5 @@
-use crate::endpoints::{call_builder::CallBuilder, Effect, Record, Server};
+use crate::endpoints::{horizon::Record, CallBuilder, Server};
+use crate::types::Effect;
 use crate::utils::{req, Direction, Endpoint};
 
 #[derive(Debug)]

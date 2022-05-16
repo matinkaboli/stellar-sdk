@@ -1,19 +1,13 @@
-use crate::endpoints::records::TemplateLink;
 use serde::{Deserialize, Serialize};
+
+use crate::endpoints::horizon::{Reserve, ResponseLink};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct EffectLinks {
     #[serde(rename(serialize = "self", deserialize = "self"))]
-    pub operation: Option<TemplateLink>,
-    pub precedes: Option<TemplateLink>,
-    pub succeeds: Option<TemplateLink>,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct ReservesRevoked {
-    asset: String,
-    amount: String,
-    claimable_balance_id: String,
+    pub operation: Option<ResponseLink>,
+    pub precedes: Option<ResponseLink>,
+    pub succeeds: Option<ResponseLink>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -25,7 +19,6 @@ pub struct Effect {
     r#type: String,
     type_i: u8,
     created_at: String,
-
     starting_balance: Option<String>,
     asset_type: Option<String>,
     amount: Option<String>,
@@ -59,5 +52,5 @@ pub struct Effect {
     shares_redeemed: Option<String>,
     liquidity_pool: Option<String>,
     shares_revoked: Option<String>,
-    reserves_revoked: Option<Vec<ReservesRevoked>>,
+    reserves_revoked: Option<Vec<Reserve>>,
 }

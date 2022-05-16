@@ -1,4 +1,5 @@
-use crate::endpoints::{asset_horizon, call_builder::CallBuilder, Record, Server};
+use crate::endpoints::{horizon::Record, CallBuilder, Server};
+use crate::types::AssetHorizon;
 use crate::utils::{req, Direction, Endpoint};
 
 #[derive(Debug)]
@@ -26,7 +27,7 @@ impl<'a> AssetCallBuilder<'a> {
     }
 }
 
-impl<'a> CallBuilder<'a, asset_horizon::AssetHorizon> for AssetCallBuilder<'a> {
+impl<'a> CallBuilder<'a, AssetHorizon> for AssetCallBuilder<'a> {
     fn new(s: &'a Server) -> Self {
         AssetCallBuilder {
             server: s,
@@ -63,7 +64,7 @@ impl<'a> CallBuilder<'a, asset_horizon::AssetHorizon> for AssetCallBuilder<'a> {
         self
     }
 
-    fn call(&self) -> Result<Record<asset_horizon::AssetHorizon>, &str> {
+    fn call(&self) -> Result<Record<AssetHorizon>, &str> {
         let mut url = String::from(format!(
             "{}{}{}",
             &self.server.0,
@@ -93,7 +94,7 @@ impl<'a> CallBuilder<'a, asset_horizon::AssetHorizon> for AssetCallBuilder<'a> {
 
         let resp = req(&url).unwrap();
 
-        let p: Record<asset_horizon::AssetHorizon> = serde_json::from_str(&resp).unwrap();
+        let p: Record<AssetHorizon> = serde_json::from_str(&resp).unwrap();
 
         Ok(p)
     }

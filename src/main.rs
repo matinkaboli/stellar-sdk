@@ -1,8 +1,9 @@
 mod endpoints;
+mod types;
 mod utils;
 
-use endpoints::call_builder::CallBuilder;
-use endpoints::{Asset, Server};
+use endpoints::{CallBuilder, Server};
+use types::Asset;
 use utils::Endpoint;
 
 fn main() {
@@ -14,7 +15,7 @@ fn main() {
         "GCMSCRWZ3QBOI6AF75B5ZWDBXOSMIRW4FSBZH5OI65Y4H4GVH7LPSOYS",
     );
 
-    let offers = server
+    let _offers = server
         .offers()
         .limit(2)
         .for_endpoint(Endpoint::Accounts(String::from(

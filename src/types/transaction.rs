@@ -1,18 +1,18 @@
 use serde::{Deserialize, Serialize};
 
-use crate::endpoints::TemplateLink;
+use crate::endpoints::horizon::ResponseLink;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct TransactionLinks {
     #[serde(rename(serialize = "self", deserialize = "self"))]
-    pub itself: Option<TemplateLink>,
-    pub account: Option<TemplateLink>,
-    pub ledger: Option<TemplateLink>,
-    pub operations: Option<TemplateLink>,
-    pub effects: Option<TemplateLink>,
-    pub precedes: Option<TemplateLink>,
-    pub succeeds: Option<TemplateLink>,
-    pub transaction: Option<TemplateLink>,
+    pub itself: Option<ResponseLink>,
+    pub account: Option<ResponseLink>,
+    pub ledger: Option<ResponseLink>,
+    pub operations: Option<ResponseLink>,
+    pub effects: Option<ResponseLink>,
+    pub precedes: Option<ResponseLink>,
+    pub succeeds: Option<ResponseLink>,
+    pub transaction: Option<ResponseLink>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

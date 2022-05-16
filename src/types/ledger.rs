@@ -1,15 +1,15 @@
 use serde::{Deserialize, Serialize};
 
-use crate::endpoints::records::TemplateLink;
+use crate::endpoints::horizon::ResponseLink;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LedgerLinks {
     #[serde(rename(serialize = "self", deserialize = "self"))]
-    pub itself: TemplateLink,
-    pub transactions: TemplateLink,
-    pub operations: TemplateLink,
-    pub payments: TemplateLink,
-    pub effects: TemplateLink,
+    pub itself: ResponseLink,
+    pub transactions: ResponseLink,
+    pub operations: ResponseLink,
+    pub payments: ResponseLink,
+    pub effects: ResponseLink,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

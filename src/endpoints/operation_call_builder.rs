@@ -1,23 +1,25 @@
 use crate::endpoints::{horizon::Record, CallBuilder, Server};
-use crate::types::Ledger;
+use crate::types::Operation;
 use crate::utils::{req, Direction, Endpoint};
 
 #[derive(Debug)]
-pub struct LedgerCallBuilder<'a> {
+pub struct OperationCallBuilder<'a> {
     pub server: &'a Server,
     pub cursor: Option<String>,
     pub order: Option<Direction>,
     pub limit: Option<u8>,
+    pub include_failed: bool,
     pub endpoint: Endpoint,
 }
 
-impl<'a> CallBuilder<'a, Ledger> for LedgerCallBuilder<'a> {
+impl<'a> CallBuilder<'a, Operation> for OperationCallBuilder<'a> {
     fn new(s: &'a Server) -> Self {
         Self {
             server: s,
             cursor: None,
             order: None,
             limit: None,
+            include_failed: false,
             endpoint: Endpoint::None,
         }
     }
@@ -34,8 +36,8 @@ impl<'a> CallBuilder<'a, Ledger> for LedgerCallBuilder<'a> {
         self
     }
 
-    fn limit(&mut self, limit_number: u8) -> &mut Self {
-        self.limit = Some(limit_number);
+    fn limit(&mut self, limit: u8) -> &mut Self {
+        self.limit = Some(limit);
 
         self
     }
@@ -46,12 +48,13 @@ impl<'a> CallBuilder<'a, Ledger> for LedgerCallBuilder<'a> {
         self
     }
 
-    fn call(&self) -> Result<Record<Ledger>, &str> {
+    fn call(&self) -> Result<Record<Operation>, &str> {
         let mut url = format!(
-            "{}{}{}",
+            "{}{}{}{}",
             &self.server.0,
             self.endpoint.as_str(),
-            "/ledgers?",
+            "/operations?",
+            format!("&include_failed={}", self.include_failed),
         );
 
         if let Some(x) = &self.cursor {
@@ -68,9 +71,17 @@ impl<'a> CallBuilder<'a, Ledger> for LedgerCallBuilder<'a> {
 
         let resp = req(&url).unwrap();
 
-        let p: Record<Ledger> = serde_json::from_str(&resp).unwrap();
+        let p: Record<Operation> = serde_json::from_str(&resp).unwrap();
 
         Ok(p)
+    }
+}
+
+impl<'a> OperationCallBuilder<'a> {
+    pub fn include_failed(&mut self, i: bool) -> &mut Self {
+        self.include_failed = i;
+
+        self
     }
 }
 
@@ -79,13 +90,19 @@ mod tests {
     use super::*;
 
     #[test]
-    fn ledger_horizon_test() {
+    fn limit_operation_call_builder() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut lcb = LedgerCallBuilder::new(&s);
+        let mut ocb = OperationCallBuilder::new(&s);
 
-        let ledger_records = lcb.limit(200).call().unwrap();
+        let op_records = ocb
+            .for_endpoint(Endpoint::Accounts(String::from(
+                "GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM",
+            )))
+            .limit(200)
+            .call()
+            .unwrap();
 
-        assert_eq!(ledger_records._embedded.records.len(), 200);
+        assert_eq!(op_records._embedded.records.len(), 200);
     }
 }

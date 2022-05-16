@@ -1,18 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::endpoints::records::TemplateLink;
+use crate::endpoints::horizon::{PriceRShortHand, ResponseLink};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct OfferLinks {
     #[serde(rename(serialize = "self", deserialize = "self"))]
-    pub itself: TemplateLink,
-    pub offer_maker: TemplateLink,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct PriceRShortHand {
-    pub n: u32,
-    pub d: u32,
+    pub itself: ResponseLink,
+    pub offer_maker: ResponseLink,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

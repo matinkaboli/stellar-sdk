@@ -1,4 +1,5 @@
-use crate::endpoints::{call_builder::CallBuilder, Record, Server, Transaction};
+use crate::endpoints::{horizon::Record, CallBuilder, Server};
+use crate::types::Transaction;
 use crate::utils::{req, Direction, Endpoint};
 
 #[derive(Debug)]

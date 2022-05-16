@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Fee {
+pub struct FeeDistribution {
     pub max: String,
     pub min: String,
     pub mode: String,
@@ -23,7 +23,6 @@ pub struct FeeStats {
     pub last_ledger: String,
     pub last_ledger_base_fee: String,
     pub ledger_capacity_usage: String,
-    pub fee_charged: Fee,
-    pub max_fee: Fee,
+    pub fee_charged: FeeDistribution,
+    pub max_fee: FeeDistribution,
 }
-

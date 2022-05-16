@@ -1,34 +1,23 @@
 use serde::{Deserialize, Serialize};
 
-use crate::endpoints::records::TemplateLink;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct PriceR {
-    pub numerator: u32,
-    pub denominator: u32,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Path {
-    pub asset_code: Option<String>,
-    pub asset_issuer: Option<String>,
-    pub asset_type: String,
-}
+use crate::endpoints::horizon::{Claimant, Path, PriceRShortHand, Reserve, ResponseLink};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct OperationLinks {
-    pub itself: TemplateLink,
-    pub transaction: TemplateLink,
-    pub effects: TemplateLink,
-    pub succeeds: TemplateLink,
-    pub precedes: TemplateLink,
+    #[serde(rename(serialize = "self", deserialize = "self"))]
+    pub itself: ResponseLink,
+    pub transaction: ResponseLink,
+    pub effects: ResponseLink,
+    pub succeeds: ResponseLink,
+    pub precedes: ResponseLink,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Payment {
+pub struct Operation {
+    pub _links: OperationLinks,
     pub id: String,
     pub paging_token: String,
-    pub transaction_successful: String,
+    pub transaction_successful: bool,
     pub source_account: String,
     pub r#type: String,
     pub type_i: u32,
@@ -55,7 +44,7 @@ pub struct Payment {
     pub buying_asset_code: Option<String>,
     pub buying_asset_issuer: Option<String>,
     pub price: Option<String>,
-    pub price_r: Option<PriceR>,
+    pub price_r: Option<PriceRShortHand>,
     pub selling_asset_type: Option<String>,
     pub selling_asset_code: Option<String>,
     pub selling_asset_issuer: Option<String>,
@@ -79,19 +68,21 @@ pub struct Payment {
     pub name: Option<String>,
     pub value: Option<String>,
     pub bump_to: Option<String>,
+    pub asset: Option<String>,
+    pub claimants: Option<Claimant>,
+    pub balance_id: Option<String>,
+    pub claimant: Option<String>,
+    pub sponsor: Option<String>,
+    pub sponsored_id: Option<String>,
+    pub begin_sponsor: Option<String>,
+    pub reserves_max: Option<Vec<Reserve>>,
+    pub reserves_min: Option<Vec<Reserve>>,
+    pub min_price: Option<String>,
+    pub min_price_r: Option<PriceRShortHand>,
+    pub max_price: Option<String>,
+    pub max_price_r: Option<PriceRShortHand>,
+    pub reserves_deposited: Option<Vec<Reserve>>,
+    pub shares_received: Option<String>,
+    pub shares: Option<String>,
+    pub reserves_received: Option<Vec<Reserve>>,
 }
-/*
-  export interface Predicate {
-    and?: Predicate[];
-    or?: Predicate[];
-    not?: Predicate;
-    abs_before?: string;
-    rel_before?: string;
-  }
-*/
-//export interface Claimant {
-//destination: string;
-//  predicate: Predicate;
-//}
-
-//horizon_api L 541
