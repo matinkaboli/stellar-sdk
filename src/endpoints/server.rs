@@ -264,8 +264,8 @@ mod tests {
     fn test_load_trade() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let my_trade = s.trades().for_offer("4").call().unwrap();
+        let my_trade = s.trades().for_offer("4").limit(1).call().unwrap();
 
-        assert_ne!("4", my_trade._embedded.records[0].base_offer_id)
+        assert_eq!("4", my_trade._embedded.records[0].base_offer_id)
     }
 }
