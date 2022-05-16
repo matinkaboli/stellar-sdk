@@ -1,6 +1,7 @@
 mod account;
 mod asset;
 mod asset_horizon;
+mod claimable_balance;
 mod effect;
 mod fee_stats;
 mod ledger;
@@ -13,6 +14,7 @@ mod transaction;
 pub use account::Account;
 pub use asset::Asset;
 pub use asset_horizon::AssetHorizon;
+pub use claimable_balance::ClaimableBalance;
 pub use effect::Effect;
 pub use fee_stats::FeeStats;
 pub use ledger::Ledger;
