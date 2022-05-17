@@ -1,9 +1,12 @@
 [package]
-name = "stellar-asset-checker"
+name = "stellar_sdk"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "stellar_sdk"
+path = "src/lib.rs"
 
 [dependencies]
 serde = { version = "1.0.104", features = ["derive"] }
