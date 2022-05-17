@@ -21,7 +21,7 @@ pub struct Embedded<T> {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Record<T> {
-    pub _links: RecordLinks,
+    pub _links: Option<RecordLinks>,
     pub _embedded: Embedded<T>,
 }
 

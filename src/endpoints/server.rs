@@ -1,17 +1,18 @@
 use serde_json;
 
 use crate::endpoints::{
-    AccountCallBuilder, AssetCallBuilder, LedgerCallBuilder, OfferCallBuilder,
-    OperationCallBuilder, PaymentCallBuilder, TransactionCallBuilder,
+    AccountCallBuilder, AssetCallBuilder, ClaimableBalanceCallbuilder, LedgerCallBuilder,
+    LiquidityPoolCallBuilder, OfferCallBuilder, OperationCallBuilder, PaymentCallBuilder,
+    StrictReceiveCallBuilder, TradeAggregationCallBuilder, TradeCallBuilder,
+    TransactionCallBuilder,
 };
 use crate::types::{
     Account, Asset, ClaimableBalance, FeeStats, Ledger, LiquidityPool, Offer, Operation,
-    Transaction,
+    StrictPath, Transaction,
 };
 use crate::utils::{req, Endpoint};
 
-use super::order_book_call_builder::OrderBookCallBuilder;
-use super::{ClaimableBalanceCallbuilder, LiquidityPoolCallBuilder, TradeCallBuilder};
+use super::strict_send_call_builder::StrictSendCallBuilder;
 
 #[derive(Debug)]
 pub struct Server(pub String);
@@ -172,19 +173,59 @@ impl Server {
     }
 
     /*
-     *
-     *
-
-    pub fn order_books<'a>(&self, selling: Asset, buying: Asset) -> OrderBookCallBuilder {
-        OrderBookCallBuilder {
-            server: self,
-            limit: None,
-            selling: &selling,
-            buying: &buying,
+        pub fn trade_aggregations<'a>(&self, base: Asset, counter: Asset, resolution: String) -> TradeAggregationCallBuilder {
+            TradeAggregationCallBuilder {
+                server: self,
+                limit: None,
+                base,
+                counter,
+                resolution,
+            }
         }
-    }
-     *
-     */
+
+        pub fn order_books<'a>(&self, selling: Asset, buying: Asset) -> OrderBookCallBuilder {
+            OrderBookCallBuilder {
+                server: self,
+                limit: None,
+                selling: &selling,
+                buying: &buying,
+            }
+        }
+
+        pub fn strict_receive_paths(
+            &self,
+            source_account: Option<String>,
+            source_assets: Option<Vec<Asset>>,
+            destination_asset: Asset,
+            destination_amount: String,
+        ) -> StrictReceiveCallBuilder {
+            StrictReceiveCallBuilder {
+                server: self,
+                limit: None,
+                source_assets,
+                source_account,
+                destination_asset,
+                destination_amount,
+            }
+        }
+
+        pub fn strict_send_paths(
+            &self,
+            destinatio_account: Option<String>,
+            destination_assets: Option<Vec<Asset>>,
+            source_asset: Asset,
+            source_amount: String,
+        ) -> StrictSendCallBuilder {
+            StrictSendCallBuilder {
+                server: self,
+                limit: None,
+                destination_assets,
+                destination_account,
+                source_asset,
+                source_amount,
+            }
+        }
+    */
 
     pub fn trades(&self) -> TradeCallBuilder {
         TradeCallBuilder {

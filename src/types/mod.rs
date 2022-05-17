@@ -9,7 +9,9 @@ mod liquidity_pool;
 mod offer;
 mod operation;
 mod order_book;
+mod strict_path;
 mod trade;
+mod trade_aggregation;
 mod transaction;
 
 pub use account::Account;
@@ -23,5 +25,7 @@ pub use liquidity_pool::LiquidityPool;
 pub use offer::Offer;
 pub use operation::Operation;
 pub use order_book::OrderBook;
+pub use strict_path::StrictPath;
 pub use trade::Trade;
+pub use trade_aggregation::TradeAggregation;
 pub use transaction::Transaction;

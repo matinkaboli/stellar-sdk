@@ -150,6 +150,6 @@ mod tests {
     fn test_for_type() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let records = s.trades().for_type(TradeType::Orderbook).call().unwrap();
+        let _records = s.trades().for_type(TradeType::Orderbook).call().unwrap();
     }
 }

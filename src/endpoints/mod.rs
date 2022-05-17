@@ -11,6 +11,9 @@ mod operation_call_builder;
 mod order_book_call_builder;
 mod payment_call_builder;
 mod server;
+mod strict_receive_call_builder;
+mod strict_send_call_builder;
+mod trade_aggregation_call_builder;
 mod trade_call_builder;
 mod transaction_call_builder;
 
@@ -25,5 +28,8 @@ pub use offer_call_builder::OfferCallBuilder;
 pub use operation_call_builder::OperationCallBuilder;
 pub use payment_call_builder::PaymentCallBuilder;
 pub use server::Server;
+pub use strict_receive_call_builder::StrictReceiveCallBuilder;
+pub use strict_send_call_builder::StrictSendCallBuilder;
+pub use trade_aggregation_call_builder::TradeAggregationCallBuilder;
 pub use trade_call_builder::TradeCallBuilder;
 pub use transaction_call_builder::TransactionCallBuilder;

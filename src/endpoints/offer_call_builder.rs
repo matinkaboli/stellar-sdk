@@ -138,14 +138,14 @@ mod tests {
     fn test_offer_call_builder_selling_buying() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let yXLM = Asset::new(
+        let y_xlm = Asset::new(
             "yXLM",
             "GARDNV3Q7YGT4AKSDF25LT32YSCCW4EV22Y2TV3I2PU2MMXJTEDL5T55",
         );
         let xlm = Asset::native();
 
         let records = OfferCallBuilder::new(&s)
-            .selling(&yXLM)
+            .selling(&y_xlm)
             .buying(&xlm)
             .limit(2)
             .call()
