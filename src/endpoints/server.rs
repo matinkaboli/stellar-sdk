@@ -3,7 +3,7 @@ use serde_json;
 use crate::endpoints::{
     AccountCallBuilder, AssetCallBuilder, ClaimableBalanceCallbuilder, LedgerCallBuilder,
     LiquidityPoolCallBuilder, OfferCallBuilder, OperationCallBuilder, PaymentCallBuilder,
-    StrictReceiveCallBuilder, TradeAggregationCallBuilder, TradeCallBuilder,
+    StrictReceiveCallBuilder, StrictSendCallBuilder, TradeAggregationCallBuilder, TradeCallBuilder,
     TransactionCallBuilder,
 };
 use crate::types::{
@@ -11,8 +11,6 @@ use crate::types::{
     StrictPath, Transaction,
 };
 use crate::utils::{req, Endpoint};
-
-use super::strict_send_call_builder::StrictSendCallBuilder;
 
 #[derive(Debug)]
 pub struct Server(pub String);
