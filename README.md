@@ -4,9 +4,9 @@ A lightweight Rust library for communicating with a Stellar Horizon server.
 
 ## Features:
 
-- it uses only 3 packages and is extremely lightweight
-- a networking layer API for Horizon endpoints.
-- facilities for building and signing transactions, for communicating with a Stellar Horizon instance, and for submitting transactions or querying network history.
+- It uses only 3 dependencies and is extremely lightweight
+- A networking layer API for Horizon endpoints.
+- Facilities for building and signing transactions, for communicating with a Stellar Horizon instance, and for submitting transactions or querying network history.
 
 ## Install
 
