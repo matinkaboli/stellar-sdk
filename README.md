@@ -1,12 +1,12 @@
 # Stellar SDK
 
-A Rust library for communicating with a Stellar Horizon server.
+A lightweight Rust library for communicating with a Stellar Horizon server.
 
-It provides:
+## Features:
 
-    - a networking layer API for Horizon endpoints.
-
-    - facilities for building and signing transactions, for communicating with a Stellar Horizon instance, and for submitting transactions or querying network history.
+- it uses only 3 packages and is extremely lightweight
+- a networking layer API for Horizon endpoints.
+- facilities for building and signing transactions, for communicating with a Stellar Horizon instance, and for submitting transactions or querying network history.
 
 ## Install
 
@@ -17,6 +17,8 @@ Add `stellar_sdk` to your Cargo.toml file and run `cargo run`
 ```
 
 ## Usage
+
+The usage is aimed to be identical to the [JavaScript Stellar Sdk](https://github.com/stellar/js-stellar-sdk) and we tried to avoid any complications that rust language itself has.
 
 ```rust
 use stellar_sdk::{
