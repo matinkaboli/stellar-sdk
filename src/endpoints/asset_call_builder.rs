@@ -65,12 +65,12 @@ impl<'a> CallBuilder<'a, AssetHorizon> for AssetCallBuilder<'a> {
     }
 
     fn call(&self) -> Result<Record<AssetHorizon>, &str> {
-        let mut url = String::from(format!(
+        let mut url = format!(
             "{}{}{}",
             &self.server.0,
             self.endpoint.as_str(),
             "/assets?",
-        ));
+        );
 
         if let Some(x) = &self.cursor {
             url.push_str(&format!("&cursor={}", x));

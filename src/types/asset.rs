@@ -31,7 +31,7 @@ impl<'a> Asset<'a> {
     }
 
     pub fn from_str(ast: &'a str) -> Self {
-        let splitted = ast.split(":");
+        let splitted = ast.split(':');
         let vec: Vec<&str> = splitted.collect();
 
         Self(vec[0], vec[1], false)

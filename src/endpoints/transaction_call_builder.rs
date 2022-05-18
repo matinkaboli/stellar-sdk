@@ -50,11 +50,11 @@ impl<'a> CallBuilder<'a, Transaction> for TransactionCallBuilder<'a> {
 
     fn call(&self) -> Result<Record<Transaction>, &str> {
         let mut url = format!(
-            "{}{}{}{}",
+            "{}{}{}&include_failed={}",
             &self.server.0,
             self.endpoint.as_str(),
             "/transactions?",
-            format!("&include_failed={}", self.include_failed),
+            self.include_failed,
         );
 
         if let Some(x) = &self.cursor {

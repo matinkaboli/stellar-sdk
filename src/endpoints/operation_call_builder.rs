@@ -50,11 +50,11 @@ impl<'a> CallBuilder<'a, Operation> for OperationCallBuilder<'a> {
 
     fn call(&self) -> Result<Record<Operation>, &str> {
         let mut url = format!(
-            "{}{}{}{}",
+            "{}{}{}&include_failed={}",
             &self.server.0,
             self.endpoint.as_str(),
             "/operations?",
-            format!("&include_failed={}", self.include_failed),
+            self.include_failed,
         );
 
         if let Some(x) = &self.cursor {

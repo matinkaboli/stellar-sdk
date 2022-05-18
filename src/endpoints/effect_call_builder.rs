@@ -47,12 +47,12 @@ impl<'a> CallBuilder<'a, Effect> for EffectCallBuilder<'a> {
     }
 
     fn call(&self) -> Result<Record<Effect>, &str> {
-        let mut url = String::from(format!(
+        let mut url = format!(
             "{}{}{}",
             &self.server.0,
             self.endpoint.as_str(),
             "/effects?",
-        ));
+        );
 
         if let Some(x) = &self.cursor {
             url.push_str(&format!("&cursor={}", x));
