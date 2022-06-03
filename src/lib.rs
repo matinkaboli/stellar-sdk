@@ -59,7 +59,8 @@
 //! }
 //! ```
 
-pub mod endpoints;
+mod api_call;
+mod endpoints;
 pub mod types;
 pub mod utils;
 

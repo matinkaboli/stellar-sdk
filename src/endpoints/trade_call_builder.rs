@@ -1,34 +1,36 @@
+use crate::api_call::api_call;
 use crate::endpoints::{horizon::Record, CallBuilder, Server};
 use crate::types::{Asset, Trade};
-use crate::utils::{req, Direction, Endpoint, TradeType};
+use crate::utils::{Direction, Endpoint, TradeType};
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct TradeCallBuilder<'a> {
-    pub server: &'a Server,
-    pub cursor: Option<String>,
-    pub order: Option<Direction>,
-    pub limit: Option<u8>,
-    pub endpoint: Endpoint,
-    pub asset_pair: Option<(Asset<'a>, Asset<'a>)>,
-    pub offer: Option<String>,
-    pub for_type: Option<TradeType>,
+    query_params: HashMap<&'a str, &'a str>,
+    server_url: &'a str,
+    endpoint: Endpoint,
 }
 
 impl<'a> TradeCallBuilder<'a> {
     pub fn for_asset_pair(&mut self, asset_pair: (Asset<'a>, Asset<'a>)) -> &mut Self {
-        self.asset_pair = Some(asset_pair);
+        self.query_params
+            .insert("base", &asset_pair.0.as_querystring("base".to_string()));
+        self.query_params.insert(
+            "counter",
+            &asset_pair.1.as_querystring("counter".to_string()),
+        );
 
         self
     }
 
-    pub fn for_offer(&mut self, offer_id: &str) -> &mut Self {
-        self.offer = Some(String::from(offer_id));
+    pub fn for_offer(&mut self, offer_id: &'a str) -> &mut Self {
+        self.query_params.insert("offer_id", offer_id);
 
         self
     }
 
     pub fn for_type(&mut self, f_type: TradeType) -> &mut Self {
-        self.for_type = Some(f_type);
+        self.query_params.insert("trade_type", &f_type.as_str());
 
         self
     }
@@ -37,31 +39,37 @@ impl<'a> TradeCallBuilder<'a> {
 impl<'a> CallBuilder<'a, Trade> for TradeCallBuilder<'a> {
     fn new(s: &'a Server) -> Self {
         Self {
-            server: s,
-            cursor: None,
-            order: None,
-            limit: None,
+            server_url: &s.0,
             endpoint: Endpoint::None,
-            asset_pair: None,
-            offer: None,
-            for_type: None,
+            query_params: HashMap::new(),
         }
     }
 
-    fn cursor(&mut self, cursor: &str) -> &mut Self {
-        self.cursor = Some(String::from(cursor));
+    fn call(&self) -> Result<Record<Trade>, anyhow::Error> {
+        let mut url = format!(
+            "{}{}{}",
+            &self.server_url,
+            self.endpoint.as_str(),
+            "/trades?",
+        );
+
+        api_call::<Record<Trade>>(url, crate::types::HttpMethod::GET, self.query_params)
+    }
+
+    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
+        self.query_params.insert("cursor", cursor);
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.order = Some(dir);
+        self.query_params.insert("order", dir.as_str());
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.limit = Some(limit);
+        self.query_params.insert("order", &limit.to_string());
 
         self
     }
@@ -70,44 +78,6 @@ impl<'a> CallBuilder<'a, Trade> for TradeCallBuilder<'a> {
         self.endpoint = endpoint;
 
         self
-    }
-
-    fn call(&self) -> Result<Record<Trade>, &str> {
-        let mut url = format!("{}{}{}", &self.server.0, self.endpoint.as_str(), "/trades?",);
-
-        if let Some(x) = &self.cursor {
-            url.push_str(&format!("&cursor={}", x));
-        }
-
-        if let Some(x) = &self.order {
-            url.push_str(&format!("&order={}", x.as_str()));
-        }
-
-        if let Some(x) = &self.limit {
-            url.push_str(&format!("&limit={}", x));
-        }
-
-        if let Some(x) = &self.asset_pair {
-            url.push_str(&format!(
-                "{}{}",
-                x.0.as_querystring(String::from("base")),
-                x.1.as_querystring(String::from("counter"))
-            ));
-        }
-
-        if let Some(x) = &self.offer {
-            url.push_str(&format!("&offer_id={}", x));
-        }
-
-        if let Some(x) = &self.for_type {
-            url.push_str(&format!("&trade_type={}", x.as_str()))
-        }
-
-        let resp = req(&url).unwrap();
-
-        let p: Record<Trade> = serde_json::from_str(&resp).unwrap();
-
-        Ok(p)
     }
 }
 

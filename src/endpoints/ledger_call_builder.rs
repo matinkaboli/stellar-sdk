@@ -82,7 +82,7 @@ mod tests {
     fn ledger_horizon_test() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut lcb = LedgerCallBuilder::new(&s);
+        let mut lcb = LedgerCallBuilder::new();
 
         let ledger_records = lcb.limit(200).call().unwrap();
 

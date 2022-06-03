@@ -82,7 +82,7 @@ mod tests {
     fn assets_horizon_test() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut ecb = EffectCallBuilder::new(&s);
+        let mut ecb = EffectCallBuilder::new();
 
         let effect_records = ecb.limit(200).call().unwrap();
 

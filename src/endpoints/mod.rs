@@ -26,6 +26,7 @@ pub use ledger_call_builder::LedgerCallBuilder;
 pub use liquidity_pool_call_builder::LiquidityPoolCallBuilder;
 pub use offer_call_builder::OfferCallBuilder;
 pub use operation_call_builder::OperationCallBuilder;
+pub use order_book_call_builder::OrderBookCallBuilder;
 pub use payment_call_builder::PaymentCallBuilder;
 pub use server::Server;
 pub use strict_receive_call_builder::StrictReceiveCallBuilder;

@@ -65,12 +65,7 @@ impl<'a> CallBuilder<'a, AssetHorizon> for AssetCallBuilder<'a> {
     }
 
     fn call(&self) -> Result<Record<AssetHorizon>, &str> {
-        let mut url = format!(
-            "{}{}{}",
-            &self.server.0,
-            self.endpoint.as_str(),
-            "/assets?",
-        );
+        let mut url = format!("{}{}{}", &self.server.0, self.endpoint.as_str(), "/assets?",);
 
         if let Some(x) = &self.cursor {
             url.push_str(&format!("&cursor={}", x));
@@ -108,7 +103,7 @@ mod tests {
     fn assets_horizon_test() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut acb = AssetCallBuilder::new(&s);
+        let mut acb = AssetCallBuilder::new();
 
         let asset_records = acb
             .asset_issuer("GA5BUT4SND34VRUJGFEVLG6LMEYOU5HSSYZLX673I2IJVRLLPATMH4RN")

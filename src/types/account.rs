@@ -7,12 +7,12 @@ use crate::endpoints::horizon::{AccountSigner, AccountThresholds, Balance, Flags
 pub struct AccountLinks {
     #[serde(rename(serialize = "self", deserialize = "self"))]
     pub itself: ResponseLink,
-    pub transactions: Option<ResponseLink>,
-    pub operations: Option<ResponseLink>,
-    pub payments: Option<ResponseLink>,
-    pub effects: Option<ResponseLink>,
-    pub offers: Option<ResponseLink>,
-    pub trades: Option<ResponseLink>,
+    pub transactions: ResponseLink,
+    pub operations: ResponseLink,
+    pub payments: ResponseLink,
+    pub effects: ResponseLink,
+    pub offers: ResponseLink,
+    pub trades: ResponseLink,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -59,54 +59,42 @@ mod tests {
                         href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM"),
                         templated: None,
                     },
-                    transactions: Some(
-                        ResponseLink {
-                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/transactions{?cursor,limit,order}"),
-                            templated: Some(
-                                true,
+                    transactions: ResponseLink {
+                        href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/transactions{?cursor,limit,order}"),
+                        templated: Some(
+                            true,
                             ),
-                        },
-                    ),
-                    operations: Some(
-                        ResponseLink {
-                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/operations{?cursor,limit,order}"),
-                            templated: Some(
-                                true,
+                    },
+                    operations: ResponseLink {
+                        href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/operations{?cursor,limit,order}"),
+                        templated: Some(
+                            true,
                             ),
-                        },
-                    ),
-                    payments: Some(
-                        ResponseLink {
-                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/payments{?cursor,limit,order}"),
-                            templated: Some(
-                                true,
+                    },
+                    payments: ResponseLink {
+                        href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/payments{?cursor,limit,order}"),
+                        templated: Some(
+                            true,
                             ),
-                        },
-                    ),
-                    effects: Some(
-                        ResponseLink {
-                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/effects{?cursor,limit,order}"),
-                            templated: Some(
-                                true,
+                    },
+                    effects: ResponseLink {
+                        href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/effects{?cursor,limit,order}"),
+                        templated: Some(
+                            true,
                             ),
-                        },
-                    ),
-                    offers: Some(
-                        ResponseLink {
-                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/offers{?cursor,limit,order}"),
-                            templated: Some(
-                                true,
+                    },
+                    offers: ResponseLink {
+                        href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/offers{?cursor,limit,order}"),
+                        templated: Some(
+                            true,
                             ),
-                        },
-                    ),
-                    trades: Some(
-                        ResponseLink {
-                            href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/trades{?cursor,limit,order}"),
-                            templated: Some(
-                                true,
+                    },
+                    trades: ResponseLink {
+                        href: String::from("https://horizon.stellar.org/accounts/GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM/trades{?cursor,limit,order}"),
+                        templated: Some(
+                            true,
                             ),
-                        },
-                    ),
+                    },
                 },
                 id: String::from("GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM"),
                 account_id: String::from("GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM"),

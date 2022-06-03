@@ -2,15 +2,16 @@ use serde_json;
 
 use crate::endpoints::{
     AccountCallBuilder, AssetCallBuilder, ClaimableBalanceCallbuilder, LedgerCallBuilder,
-    LiquidityPoolCallBuilder, OfferCallBuilder, OperationCallBuilder, PaymentCallBuilder,
-    StrictReceiveCallBuilder, StrictSendCallBuilder, TradeAggregationCallBuilder, TradeCallBuilder,
-    TransactionCallBuilder,
+    LiquidityPoolCallBuilder, OfferCallBuilder, OperationCallBuilder, OrderBookCallBuilder,
+    PaymentCallBuilder, StrictReceiveCallBuilder, StrictSendCallBuilder,
+    TradeAggregationCallBuilder, TradeCallBuilder, TransactionCallBuilder,
 };
 use crate::types::{
     Account, Asset, ClaimableBalance, FeeStats, Ledger, LiquidityPool, Offer, Operation,
     StrictPath, Transaction,
 };
 use crate::utils::{req, Endpoint};
+use crate::CallBuilder;
 
 #[derive(Debug)]
 pub struct Server(pub String);
@@ -171,25 +172,29 @@ impl Server {
     }
 
     /*
-        pub fn trade_aggregations<'a>(&self, base: Asset, counter: Asset, resolution: String) -> TradeAggregationCallBuilder {
-            TradeAggregationCallBuilder {
-                server: self,
-                limit: None,
-                base,
-                counter,
-                resolution,
+            pub fn trade_aggregations<'a>(&self, base: Asset, counter: Asset, resolution: String) -> TradeAggregationCallBuilder {
+                TradeAggregationCallBuilder {
+                    server: self,
+                    limit: None,
+                    base,
+                    counter,
+                    resolution,
+                }
             }
+    */
+    pub fn order_books<'a>(
+        &'a self,
+        selling: &'a Asset<'a>,
+        buying: &'a Asset<'a>,
+    ) -> OrderBookCallBuilder<'a> {
+        OrderBookCallBuilder {
+            server: self,
+            limit: None,
+            selling: selling,
+            buying: buying,
         }
-
-        pub fn order_books<'a>(&self, selling: Asset, buying: Asset) -> OrderBookCallBuilder {
-            OrderBookCallBuilder {
-                server: self,
-                limit: None,
-                selling: &selling,
-                buying: &buying,
-            }
-        }
-
+    }
+    /*
         pub fn strict_receive_paths(
             &self,
             source_account: Option<String>,
@@ -226,16 +231,7 @@ impl Server {
     */
 
     pub fn trades(&self) -> TradeCallBuilder {
-        TradeCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            limit: None,
-            endpoint: Endpoint::None,
-            asset_pair: None,
-            offer: None,
-            for_type: None,
-        }
+        TradeCallBuilder::new(&self)
     }
 
     pub fn payments(&self) -> PaymentCallBuilder {

@@ -93,7 +93,7 @@ mod tests {
     fn limit_transaction_call_builder() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut tcb = TransactionCallBuilder::new(&s);
+        let mut tcb = TransactionCallBuilder::new();
 
         let tx_records = tcb
             .for_endpoint(Endpoint::Accounts(String::from(

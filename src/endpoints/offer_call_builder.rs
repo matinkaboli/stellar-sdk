@@ -127,7 +127,7 @@ mod tests {
     fn test_offer_call_builder() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut ocb = OfferCallBuilder::new(&s);
+        let mut ocb = OfferCallBuilder::new();
 
         let offer_records = ocb.limit(200).call().unwrap();
 
@@ -144,7 +144,7 @@ mod tests {
         );
         let xlm = Asset::native();
 
-        let records = OfferCallBuilder::new(&s)
+        let records = OfferCallBuilder::new()
             .selling(&y_xlm)
             .buying(&xlm)
             .limit(2)

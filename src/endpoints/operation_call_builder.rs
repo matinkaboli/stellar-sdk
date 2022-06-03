@@ -93,7 +93,7 @@ mod tests {
     fn limit_operation_call_builder() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut ocb = OperationCallBuilder::new(&s);
+        let mut ocb = OperationCallBuilder::new();
 
         let op_records = ocb
             .for_endpoint(Endpoint::Accounts(String::from(

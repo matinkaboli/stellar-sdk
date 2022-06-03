@@ -100,7 +100,7 @@ mod tests {
     fn test_limit_liquidity_pools() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut lpcb = LiquidityPoolCallBuilder::new(&s);
+        let mut lpcb = LiquidityPoolCallBuilder::new();
 
         let records = lpcb.limit(200).call().unwrap();
 
@@ -122,7 +122,7 @@ mod tests {
             "GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
         );
 
-        let mut lpcb = LiquidityPoolCallBuilder::new(&s);
+        let mut lpcb = LiquidityPoolCallBuilder::new();
 
         let records = lpcb.for_assets(vec![y_xlm, y_usdc]).call().unwrap();
 

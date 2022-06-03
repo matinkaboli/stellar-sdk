@@ -120,7 +120,7 @@ mod tests {
     fn test_claimable_balance_sponsor() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let cbcb = ClaimableBalanceCallbuilder::new(&s)
+        let cbcb = ClaimableBalanceCallbuilder::new()
             .sponsor("GDCJIHD3623OCYNH65UUQC3NLG2D6YCNCDPZULRLCLOA76TBQRL6A3TF")
             .limit(1)
             .call()
@@ -143,7 +143,7 @@ mod tests {
             "GAB7STHVD5BDH3EEYXPI3OM7PCS4V443PYB5FNT6CFGJVPDLMKDM24WK",
         );
 
-        let cbcb = ClaimableBalanceCallbuilder::new(&s)
+        let cbcb = ClaimableBalanceCallbuilder::new()
             .asset(&lsp)
             .limit(1)
             .call()

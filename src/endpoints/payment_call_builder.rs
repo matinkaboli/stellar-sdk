@@ -82,7 +82,7 @@ mod tests {
     fn limit_payment_call_builder() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut pcb = PaymentCallBuilder::new(&s);
+        let mut pcb = PaymentCallBuilder::new();
 
         let payment_records = pcb
             .for_endpoint(Endpoint::Accounts(String::from(
