@@ -1,9 +1,9 @@
 use anyhow::{self, bail};
 use serde::Deserialize;
 use std::collections::HashMap;
-use ureq;
+use ureq::{self, Error as UreqError};
 
-use crate::types::HttpMethod;
+use crate::types::{HorizonError, HttpMethod};
 
 pub fn api_call<'a, T: Deserialize<'a>>(
     url: String,
@@ -21,12 +21,23 @@ pub fn api_call<'a, T: Deserialize<'a>>(
         req.query(query_param.0, query_param.1);
     }
 
-    let res = req.call()?;
-    if res.status() != 200 {
-        bail!("failed")
+    match req.call() {
+        Ok(res) => {
+            let res_str = res.into_string()?;
+            return Ok(serde_json::from_str::<T>(&res_str)?);
+        }
+        Err(e) => match e {
+            UreqError::Status(code, res) => {
+                if code >= 500 {
+                    bail!("failed");
+                }
+
+                let res_str = res.into_string()?;
+                let parsed: HorizonError = serde_json::from_str(&res_str)?;
+
+                return Err(parsed.into());
+            }
+            _ => bail!("failed"),
+        },
     }
-
-    let res_str = res.into_string()?;
-
-    Ok(serde_json::from_str::<T>(&res_str)?)
 }
