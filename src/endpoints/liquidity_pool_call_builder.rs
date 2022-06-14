@@ -1,20 +1,27 @@
+use std::collections::HashMap;
+
+use crate::api_call::api_call;
 use crate::endpoints::{horizon::Record, CallBuilder, Server};
 use crate::types::{Asset, LiquidityPool};
-use crate::utils::{req, Direction, Endpoint};
+use crate::utils::{Direction, Endpoint};
 
 #[derive(Debug)]
 pub struct LiquidityPoolCallBuilder<'a> {
-    pub server: &'a Server,
-    pub cursor: Option<String>,
-    pub order: Option<Direction>,
-    pub limit: Option<u8>,
-    pub endpoint: Endpoint,
-    pub assets: Option<Vec<Asset<'a>>>,
+    server_url: &'a str,
+    endpoint: Endpoint,
+    query_params: HashMap<&'a str, &'a str>,
 }
 
 impl<'a> LiquidityPoolCallBuilder<'a> {
     pub fn for_assets(&mut self, assets: Vec<Asset<'a>>) -> &mut Self {
-        self.assets = Some(assets);
+        self.query_params.insert(
+            "reserves",
+            &assets
+                .into_iter()
+                .map(|asset| asset.as_str())
+                .collect::<Vec<String>>()
+                .join(","),
+        );
 
         self
     }
@@ -23,29 +30,26 @@ impl<'a> LiquidityPoolCallBuilder<'a> {
 impl<'a> CallBuilder<'a, LiquidityPool> for LiquidityPoolCallBuilder<'a> {
     fn new(s: &'a Server) -> Self {
         Self {
-            server: s,
-            cursor: None,
-            order: None,
-            limit: None,
+            server_url: &s.0,
             endpoint: Endpoint::None,
-            assets: None,
+            query_params: HashMap::new(),
         }
     }
 
-    fn cursor(&mut self, cursor: &str) -> &mut Self {
-        self.cursor = Some(String::from(cursor));
+    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
+        self.query_params.insert("cursor", cursor);
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.order = Some(dir);
+        self.query_params.insert("order", dir.as_str());
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.limit = Some(limit);
+        self.query_params.insert("order", &limit.to_string());
 
         self
     }
@@ -56,39 +60,15 @@ impl<'a> CallBuilder<'a, LiquidityPool> for LiquidityPoolCallBuilder<'a> {
         self
     }
 
-    fn call(&self) -> Result<Record<LiquidityPool>, &str> {
+    fn call(&self) -> Result<Record<LiquidityPool>, anyhow::Error> {
         let mut url = format!(
             "{}{}{}",
-            &self.server.0,
+            &self.server_url,
             self.endpoint.as_str(),
-            "/liquidity_pools?",
+            "/liquidity_pools",
         );
 
-        if let Some(x) = &self.cursor {
-            url.push_str(&format!("&cursor={}", x));
-        }
-
-        if let Some(x) = &self.order {
-            url.push_str(&format!("&order={}", x.as_str()));
-        }
-
-        if let Some(x) = &self.limit {
-            url.push_str(&format!("&limit={}", x));
-        }
-
-        if let Some(x) = &self.assets {
-            url.push_str("&reserves=");
-
-            for i in x {
-                url.push_str(&format!("{},", i.as_str()))
-            }
-        }
-
-        let resp = req(&url).unwrap();
-
-        let p: Record<LiquidityPool> = serde_json::from_str(&resp).unwrap();
-
-        Ok(p)
+        api_call::<Record<LiquidityPool>>(url, crate::types::HttpMethod::GET, self.query_params)
     }
 }
 
@@ -100,7 +80,7 @@ mod tests {
     fn test_limit_liquidity_pools() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut lpcb = LiquidityPoolCallBuilder::new();
+        let mut lpcb = LiquidityPoolCallBuilder::new(&s);
 
         let records = lpcb.limit(200).call().unwrap();
 
@@ -122,7 +102,7 @@ mod tests {
             "GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
         );
 
-        let mut lpcb = LiquidityPoolCallBuilder::new();
+        let mut lpcb = LiquidityPoolCallBuilder::new(&s);
 
         let records = lpcb.for_assets(vec![y_xlm, y_usdc]).call().unwrap();
 
