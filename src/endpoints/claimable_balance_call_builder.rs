@@ -54,7 +54,7 @@ impl<'a> CallBuilder<'a, ClaimableBalance> for ClaimableBalanceCallbuilder<'a> {
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.query_params.insert("order", &limit.to_string());
+        self.query_params.insert("limit", &limit.to_string());
 
         self
     }

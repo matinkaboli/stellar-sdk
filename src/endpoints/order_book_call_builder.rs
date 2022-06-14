@@ -1,4 +1,4 @@
-use crate::endpoints::{horizon::Record, Server};
+use crate::endpoints::Server;
 use crate::types::{Asset, OrderBook};
 use crate::utils::req;
 
