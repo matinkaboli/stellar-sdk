@@ -1,34 +1,32 @@
+use std::collections::HashMap;
+
+use crate::api_call::api_call;
 use crate::endpoints::{horizon::Record, CallBuilder, Server};
 use crate::types::{Asset, ClaimableBalance};
-use crate::utils::{req, Direction, Endpoint};
+use crate::utils::{Direction, Endpoint};
 
 #[derive(Debug)]
 pub struct ClaimableBalanceCallbuilder<'a> {
-    pub server: &'a Server,
-    pub cursor: Option<String>,
-    pub order: Option<Direction>,
-    pub limit: Option<u8>,
-    pub endpoint: Endpoint,
-    pub sponsor: Option<String>,
-    pub asset: Option<&'a Asset<'a>>,
-    pub claimant: Option<String>,
+    server_url: &'a str,
+    endpoint: Endpoint,
+    query_params: HashMap<&'a str, &'a str>,
 }
 
 impl<'a> ClaimableBalanceCallbuilder<'a> {
-    pub fn sponsor(&mut self, sponsor: &str) -> &mut Self {
-        self.sponsor = Some(String::from(sponsor));
+    pub fn sponsor(&mut self, sponsor: &'a str) -> &mut Self {
+        self.query_params.insert("sponsor", sponsor);
 
         self
     }
 
     pub fn asset(&mut self, asset: &'a Asset<'a>) -> &mut Self {
-        self.asset = Some(asset);
+        self.query_params.insert("asset", &asset.as_str());
 
         self
     }
 
-    pub fn claimant(&mut self, claimant: &str) -> &mut Self {
-        self.claimant = Some(String::from(claimant));
+    pub fn claimant(&mut self, claimant: &'a str) -> &mut Self {
+        self.query_params.insert("claimant", claimant);
 
         self
     }
@@ -37,31 +35,26 @@ impl<'a> ClaimableBalanceCallbuilder<'a> {
 impl<'a> CallBuilder<'a, ClaimableBalance> for ClaimableBalanceCallbuilder<'a> {
     fn new(s: &'a Server) -> Self {
         Self {
-            server: s,
-            cursor: None,
-            order: None,
-            limit: None,
+            server_url: &s.0,
             endpoint: Endpoint::None,
-            sponsor: None,
-            asset: None,
-            claimant: None,
+            query_params: HashMap::new(),
         }
     }
 
-    fn cursor(&mut self, cursor: &str) -> &mut Self {
-        self.cursor = Some(String::from(cursor));
+    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
+        self.query_params.insert("cursor", cursor);
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.order = Some(dir);
+        self.query_params.insert("order", dir.as_str());
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.limit = Some(limit);
+        self.query_params.insert("order", &limit.to_string());
 
         self
     }
@@ -72,43 +65,15 @@ impl<'a> CallBuilder<'a, ClaimableBalance> for ClaimableBalanceCallbuilder<'a> {
         self
     }
 
-    fn call(&self) -> Result<Record<ClaimableBalance>, &str> {
+    fn call(&self) -> Result<Record<ClaimableBalance>, anyhow::Error> {
         let mut url = format!(
             "{}{}{}",
-            &self.server.0,
+            &self.server_url,
             self.endpoint.as_str(),
-            "/claimable_balances?",
+            "/trades?",
         );
 
-        if let Some(x) = &self.cursor {
-            url.push_str(&format!("&cursor={}", x));
-        }
-
-        if let Some(x) = &self.order {
-            url.push_str(&format!("&order={}", x.as_str()));
-        }
-
-        if let Some(x) = &self.limit {
-            url.push_str(&format!("&limit={}", x));
-        }
-
-        if let Some(x) = &self.sponsor {
-            url.push_str(&format!("&sponsor={}", x));
-        }
-
-        if let Some(x) = &self.asset {
-            url.push_str(&format!("&asset={}", x.as_str()));
-        }
-
-        if let Some(x) = &self.claimant {
-            url.push_str(&format!("&claimant={}", x));
-        }
-
-        let resp = req(&url).unwrap();
-
-        let p: Record<ClaimableBalance> = serde_json::from_str(&resp).unwrap();
-
-        Ok(p)
+        api_call::<Record<ClaimableBalance>>(url, crate::types::HttpMethod::GET, self.query_params)
     }
 }
 
@@ -120,7 +85,7 @@ mod tests {
     fn test_claimable_balance_sponsor() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let cbcb = ClaimableBalanceCallbuilder::new()
+        let cbcb = ClaimableBalanceCallbuilder::new(&s)
             .sponsor("GDCJIHD3623OCYNH65UUQC3NLG2D6YCNCDPZULRLCLOA76TBQRL6A3TF")
             .limit(1)
             .call()
@@ -143,7 +108,7 @@ mod tests {
             "GAB7STHVD5BDH3EEYXPI3OM7PCS4V443PYB5FNT6CFGJVPDLMKDM24WK",
         );
 
-        let cbcb = ClaimableBalanceCallbuilder::new()
+        let cbcb = ClaimableBalanceCallbuilder::new(&s)
             .asset(&lsp)
             .limit(1)
             .call()
