@@ -1,41 +1,40 @@
+use std::collections::HashMap;
+
+use crate::api_call::api_call;
 use crate::endpoints::{horizon::Record, CallBuilder, Server};
 use crate::types::Ledger;
 use crate::utils::{req, Direction, Endpoint};
 
 #[derive(Debug)]
 pub struct LedgerCallBuilder<'a> {
-    pub server: &'a Server,
-    pub cursor: Option<String>,
-    pub order: Option<Direction>,
-    pub limit: Option<u8>,
-    pub endpoint: Endpoint,
+    server_url: &'a str,
+    endpoint: Endpoint,
+    query_params: HashMap<&'a str, &'a str>,
 }
 
 impl<'a> CallBuilder<'a, Ledger> for LedgerCallBuilder<'a> {
     fn new(s: &'a Server) -> Self {
         Self {
-            server: s,
-            cursor: None,
-            order: None,
-            limit: None,
+            server_url: &s.0,
             endpoint: Endpoint::None,
+            query_params: HashMap::new(),
         }
     }
 
-    fn cursor(&mut self, cursor: &str) -> &mut Self {
-        self.cursor = Some(String::from(cursor));
+    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
+        self.query_params.insert("cursor", cursor);
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.order = Some(dir);
+        self.query_params.insert("order", dir.as_str());
 
         self
     }
 
-    fn limit(&mut self, limit_number: u8) -> &mut Self {
-        self.limit = Some(limit_number);
+    fn limit(&mut self, limit: u8) -> &mut Self {
+        self.query_params.insert("order", &limit.to_string());
 
         self
     }
@@ -46,31 +45,15 @@ impl<'a> CallBuilder<'a, Ledger> for LedgerCallBuilder<'a> {
         self
     }
 
-    fn call(&self) -> Result<Record<Ledger>, &str> {
+    fn call(&self) -> Result<Record<Ledger>, anyhow::Error> {
         let mut url = format!(
             "{}{}{}",
-            &self.server.0,
+            &self.server_url,
             self.endpoint.as_str(),
-            "/ledgers?",
+            "/ledgers",
         );
 
-        if let Some(x) = &self.cursor {
-            url.push_str(&format!("&cursor={}", x));
-        }
-
-        if let Some(x) = &self.order {
-            url.push_str(&format!("&order={}", x.as_str()));
-        }
-
-        if let Some(x) = &self.limit {
-            url.push_str(&format!("&limit={}", x));
-        }
-
-        let resp = req(&url).unwrap();
-
-        let p: Record<Ledger> = serde_json::from_str(&resp).unwrap();
-
-        Ok(p)
+        api_call::<Record<Ledger>>(url, crate::types::HttpMethod::GET, self.query_params)
     }
 }
 
@@ -82,7 +65,7 @@ mod tests {
     fn ledger_horizon_test() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut lcb = LedgerCallBuilder::new();
+        let mut lcb = LedgerCallBuilder::new(&s);
 
         let ledger_records = lcb.limit(200).call().unwrap();
 
