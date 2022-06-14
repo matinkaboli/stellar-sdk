@@ -1,41 +1,40 @@
+use std::collections::HashMap;
+
+use crate::api_call::api_call;
 use crate::endpoints::{horizon::Record, CallBuilder, Server};
 use crate::types::Operation;
-use crate::utils::{req, Direction, Endpoint};
+use crate::utils::{Direction, Endpoint};
 
 #[derive(Debug)]
 pub struct PaymentCallBuilder<'a> {
-    pub server: &'a Server,
-    pub cursor: Option<String>,
-    pub order: Option<Direction>,
-    pub limit: Option<u8>,
-    pub endpoint: Endpoint,
+    server_url: &'a str,
+    endpoint: Endpoint,
+    query_params: HashMap<&'a str, &'a str>,
 }
 
 impl<'a> CallBuilder<'a, Operation> for PaymentCallBuilder<'a> {
     fn new(s: &'a Server) -> Self {
         Self {
-            server: s,
-            cursor: None,
-            order: None,
-            limit: None,
+            server_url: &s.0,
             endpoint: Endpoint::None,
+            query_params: HashMap::new(),
         }
     }
 
-    fn cursor(&mut self, cursor: &str) -> &mut Self {
-        self.cursor = Some(String::from(cursor));
+    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
+        self.query_params.insert("cursor", cursor);
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.order = Some(dir);
+        self.query_params.insert("order", dir.as_str());
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.limit = Some(limit);
+        self.query_params.insert("limit", &limit.to_string());
 
         self
     }
@@ -46,31 +45,15 @@ impl<'a> CallBuilder<'a, Operation> for PaymentCallBuilder<'a> {
         self
     }
 
-    fn call(&self) -> Result<Record<Operation>, &str> {
+    fn call(&self) -> Result<Record<Operation>, anyhow::Error> {
         let mut url = format!(
             "{}{}{}",
-            &self.server.0,
+            &self.server_url,
             self.endpoint.as_str(),
-            "/payments?",
+            "/payments",
         );
 
-        if let Some(x) = &self.cursor {
-            url.push_str(&format!("&cursor={}", x));
-        }
-
-        if let Some(x) = &self.order {
-            url.push_str(&format!("&order={}", x.as_str()));
-        }
-
-        if let Some(x) = &self.limit {
-            url.push_str(&format!("&limit={}", x));
-        }
-
-        let resp = req(&url).unwrap();
-
-        let p: Record<Operation> = serde_json::from_str(&resp).unwrap();
-
-        Ok(p)
+        api_call::<Record<Operation>>(url, crate::types::HttpMethod::GET, self.query_params)
     }
 }
 
@@ -82,7 +65,7 @@ mod tests {
     fn limit_payment_call_builder() {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
-        let mut pcb = PaymentCallBuilder::new();
+        let mut pcb = PaymentCallBuilder::new(&s);
 
         let payment_records = pcb
             .for_endpoint(Endpoint::Accounts(String::from(
