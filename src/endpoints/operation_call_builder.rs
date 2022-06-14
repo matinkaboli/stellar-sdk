@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::api_call::api_call;
 use crate::endpoints::{horizon::Record, CallBuilder, Server};
 use crate::types::Operation;
-use crate::utils::{req, Direction, Endpoint};
+use crate::utils::{Direction, Endpoint};
 
 #[derive(Debug)]
 pub struct OperationCallBuilder<'a> {
