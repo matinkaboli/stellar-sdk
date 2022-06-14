@@ -1,5 +1,8 @@
+use std::collections::HashMap;
+
 use serde_json;
 
+use crate::api_call::api_call;
 use crate::endpoints::{
     AccountCallBuilder, AssetCallBuilder, ClaimableBalanceCallbuilder, LedgerCallBuilder,
     LiquidityPoolCallBuilder, OfferCallBuilder, OperationCallBuilder, OrderBookCallBuilder,
@@ -21,178 +24,96 @@ impl Server {
         Server(network_id)
     }
 
-    pub fn load_account(&self, account_id: &str) -> Result<Account, &str> {
+    pub fn load_account(&self, account_id: &str) -> Result<Account, anyhow::Error> {
         let url = format!("{}/accounts/{}", self.0, account_id);
-        let resp = req(&url).unwrap();
-
-        let parsed: Account = serde_json::from_str(&resp).unwrap();
-
-        Ok(parsed)
+        api_call::<Account>(url, crate::types::HttpMethod::GET, HashMap::new())
     }
 
     pub fn accounts(&self) -> AccountCallBuilder {
-        AccountCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            sponsor: None,
-            limit: None,
-            signer: None,
-            liquidity_pool: None,
-            asset: None,
-            endpoint: Endpoint::None,
-        }
+        AccountCallBuilder::new(self)
     }
 
-    pub fn load_transaction(&self, hash: &str) -> Result<Transaction, &str> {
+    pub fn load_transaction(&self, hash: &str) -> Result<Transaction, anyhow::Error> {
         let url = format!("{}/transactions/{}", self.0, hash);
-        let resp = req(&url).unwrap();
-
-        let parsed: Transaction = serde_json::from_str(&resp).unwrap();
-
-        Ok(parsed)
+        api_call::<Transaction>(url, crate::types::HttpMethod::GET, HashMap::new())
     }
 
     pub fn transactions(&self) -> TransactionCallBuilder {
-        TransactionCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            limit: None,
-            include_failed: false,
-            endpoint: Endpoint::None,
-        }
+        TransactionCallBuilder::new(self)
     }
 
-    pub fn load_ledger(&self, sequence: u64) -> Result<Ledger, &str> {
+    pub fn load_ledger(&self, sequence: u64) -> Result<Ledger, anyhow::Error> {
         let url = format!("{}/ledgers/{}", self.0, sequence);
-        let resp = req(&url).unwrap();
-
-        let parsed: Ledger = serde_json::from_str(&resp).unwrap();
-
-        Ok(parsed)
+        api_call::<Ledger>(url, crate::types::HttpMethod::GET, HashMap::new())
     }
 
     pub fn ledgers(&self) -> LedgerCallBuilder {
-        LedgerCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            limit: None,
-            endpoint: Endpoint::None,
-        }
+        LedgerCallBuilder::new(self)
     }
 
-    pub fn load_offer(&self, offer_id: &str) -> Result<Offer, &str> {
+    pub fn load_offer(&self, offer_id: &str) -> Result<Offer, anyhow::Error> {
         let url = format!("{}/offers/{}", self.0, offer_id);
-        let resp = req(&url).unwrap();
-
-        let parsed: Offer = serde_json::from_str(&resp).unwrap();
-
-        Ok(parsed)
+        api_call::<Offer>(url, crate::types::HttpMethod::GET, HashMap::new())
     }
 
     pub fn offers(&self) -> OfferCallBuilder {
-        OfferCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            limit: None,
-            buying: None,
-            seller: None,
-            selling: None,
-            sponsor: None,
-            endpoint: Endpoint::None,
-        }
+        OfferCallBuilder::new(self)
     }
 
-    pub fn load_operation(&self, operation_id: &str) -> Result<Operation, &str> {
+    pub fn load_operation(&self, operation_id: &str) -> Result<Operation, anyhow::Error> {
         let url = format!("{}/operations/{}", self.0, operation_id);
-        let resp = req(&url).unwrap();
-
-        let parsed: Operation = serde_json::from_str(&resp).unwrap();
-
-        Ok(parsed)
+        api_call::<Operation>(url, crate::types::HttpMethod::GET, HashMap::new())
     }
 
     pub fn operations(&self) -> OperationCallBuilder {
-        OperationCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            limit: None,
-            endpoint: Endpoint::None,
-            include_failed: false,
-        }
+        OperationCallBuilder::new(self)
     }
 
-    pub fn load_liquidity_pool(&self, liquidity_pool_id: &str) -> Result<LiquidityPool, &str> {
+    pub fn load_liquidity_pool(
+        &self,
+        liquidity_pool_id: &str,
+    ) -> Result<LiquidityPool, anyhow::Error> {
         let url = format!("{}/liquidity_pools/{}", self.0, liquidity_pool_id);
-        let resp = req(&url).unwrap();
-
-        let parsed: LiquidityPool = serde_json::from_str(&resp).unwrap();
-
-        Ok(parsed)
+        api_call::<LiquidityPool>(url, crate::types::HttpMethod::GET, HashMap::new())
     }
 
     pub fn liquidity_pools(&self) -> LiquidityPoolCallBuilder {
-        LiquidityPoolCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            limit: None,
-            assets: None,
-            endpoint: Endpoint::None,
-        }
+        LiquidityPoolCallBuilder::new(self)
     }
 
     pub fn load_claimable_balance(
         &self,
         claimable_balance_id: &str,
-    ) -> Result<ClaimableBalance, &str> {
+    ) -> Result<ClaimableBalance, anyhow::Error> {
         let url = format!("{}/claimable_balances/{}", self.0, claimable_balance_id);
-        let resp = req(&url).unwrap();
-
-        let parsed: ClaimableBalance = serde_json::from_str(&resp).unwrap();
-
-        Ok(parsed)
+        api_call::<ClaimableBalance>(url, crate::types::HttpMethod::GET, HashMap::new())
     }
 
     pub fn claimable_balances(&self) -> ClaimableBalanceCallbuilder {
-        ClaimableBalanceCallbuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            limit: None,
-            endpoint: Endpoint::None,
-            sponsor: None,
-            asset: None,
-            claimant: None,
-        }
+        ClaimableBalanceCallbuilder::new(self)
     }
 
-    /*
-            pub fn trade_aggregations<'a>(&self, base: Asset, counter: Asset, resolution: String) -> TradeAggregationCallBuilder {
-                TradeAggregationCallBuilder {
-                    server: self,
-                    limit: None,
-                    base,
-                    counter,
-                    resolution,
-                }
-            }
-    */
+    // pub fn trade_aggregations<'a>(
+    //     &self,
+    //     base: Asset,
+    //     counter: Asset,
+    //     resolution: String,
+    // ) -> TradeAggregationCallBuilder {
+    //     TradeAggregationCallBuilder {
+    //         server: self,
+    //         limit: None,
+    //         base,
+    //         counter,
+    //         resolution,
+    //     }
+    // }
+
     pub fn order_books<'a>(
         &'a self,
         selling: &'a Asset<'a>,
         buying: &'a Asset<'a>,
     ) -> OrderBookCallBuilder<'a> {
-        OrderBookCallBuilder {
-            server: self,
-            limit: None,
-            selling: selling,
-            buying: buying,
-        }
+        OrderBookCallBuilder::new(self, selling, buying)
     }
     /*
         pub fn strict_receive_paths(
@@ -235,25 +156,11 @@ impl Server {
     }
 
     pub fn payments(&self) -> PaymentCallBuilder {
-        PaymentCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            limit: None,
-            endpoint: Endpoint::None,
-        }
+        PaymentCallBuilder::new(self)
     }
 
     pub fn assets(&self) -> AssetCallBuilder {
-        AssetCallBuilder {
-            server: self,
-            cursor: None,
-            order: None,
-            limit: None,
-            asset_code: None,
-            asset_issuer: None,
-            endpoint: Endpoint::None,
-        }
+        AssetCallBuilder::new(self)
     }
 
     pub fn fee_stats(&self) -> Result<FeeStats, &str> {

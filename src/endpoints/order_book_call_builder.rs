@@ -4,10 +4,10 @@ use crate::utils::req;
 
 #[derive(Debug)]
 pub struct OrderBookCallBuilder<'a> {
-    pub server: &'a Server,
-    pub limit: Option<u8>,
-    pub selling: &'a Asset<'a>,
-    pub buying: &'a Asset<'a>,
+    server: &'a Server,
+    limit: Option<u8>,
+    selling: &'a Asset<'a>,
+    buying: &'a Asset<'a>,
 }
 
 impl<'a> OrderBookCallBuilder<'a> {
