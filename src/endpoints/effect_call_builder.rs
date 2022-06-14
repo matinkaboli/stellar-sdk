@@ -50,7 +50,7 @@ impl<'a> CallBuilder<'a, Effect> for EffectCallBuilder<'a> {
             "{}{}{}",
             &self.server_url,
             self.endpoint.as_str(),
-            "/trades?",
+            "/effects",
         );
 
         api_call::<Record<Effect>>(url, crate::types::HttpMethod::GET, self.query_params)

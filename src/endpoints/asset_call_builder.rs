@@ -64,7 +64,7 @@ impl<'a> CallBuilder<'a, AssetHorizon> for AssetCallBuilder<'a> {
             "{}{}{}",
             &self.server_url,
             self.endpoint.as_str(),
-            "/trades?",
+            "/assets",
         );
 
         api_call::<Record<AssetHorizon>>(url, crate::types::HttpMethod::GET, self.query_params)

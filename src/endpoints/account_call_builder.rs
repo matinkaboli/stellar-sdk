@@ -52,7 +52,7 @@ impl<'a> CallBuilder<'a, Account> for AccountCallBuilder<'a> {
             "{}{}{}",
             &self.server_url,
             self.endpoint.as_str(),
-            "/trades?",
+            "/accounts",
         );
 
         api_call::<Record<Account>>(url, crate::types::HttpMethod::GET, self.query_params)

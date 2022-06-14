@@ -70,7 +70,7 @@ impl<'a> CallBuilder<'a, ClaimableBalance> for ClaimableBalanceCallbuilder<'a> {
             "{}{}{}",
             &self.server_url,
             self.endpoint.as_str(),
-            "/trades?",
+            "/claimable_balances",
         );
 
         api_call::<Record<ClaimableBalance>>(url, crate::types::HttpMethod::GET, self.query_params)
