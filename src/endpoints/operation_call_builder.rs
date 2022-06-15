@@ -12,15 +12,17 @@ pub struct OperationCallBuilder<'a> {
     query_params: HashMap<&'a str, &'a str>,
 }
 
-impl<'a> CallBuilder<'a, Operation> for OperationCallBuilder<'a> {
-    fn new(s: &'a Server) -> Self {
+impl<'a> OperationCallBuilder<'a> {
+    pub fn new(s: &'a Server) -> Self {
         Self {
             server_url: &s.0,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
         }
     }
+}
 
+impl<'a> CallBuilder<'a, Operation> for OperationCallBuilder<'a> {
     fn cursor(&mut self, cursor: &'a str) -> &mut Self {
         self.query_params.insert("cursor", cursor);
 

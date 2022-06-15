@@ -13,6 +13,14 @@ pub struct ClaimableBalanceCallbuilder<'a> {
 }
 
 impl<'a> ClaimableBalanceCallbuilder<'a> {
+    pub fn new(s: &'a Server) -> Self {
+        Self {
+            server_url: &s.0,
+            endpoint: Endpoint::None,
+            query_params: HashMap::new(),
+        }
+    }
+
     pub fn sponsor(&mut self, sponsor: &'a str) -> &mut Self {
         self.query_params.insert("sponsor", sponsor);
 
@@ -33,14 +41,6 @@ impl<'a> ClaimableBalanceCallbuilder<'a> {
 }
 
 impl<'a> CallBuilder<'a, ClaimableBalance> for ClaimableBalanceCallbuilder<'a> {
-    fn new(s: &'a Server) -> Self {
-        Self {
-            server_url: &s.0,
-            endpoint: Endpoint::None,
-            query_params: HashMap::new(),
-        }
-    }
-
     fn cursor(&mut self, cursor: &'a str) -> &mut Self {
         self.query_params.insert("cursor", cursor);
 

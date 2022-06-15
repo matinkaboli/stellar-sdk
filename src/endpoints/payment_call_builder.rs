@@ -12,15 +12,17 @@ pub struct PaymentCallBuilder<'a> {
     query_params: HashMap<&'a str, &'a str>,
 }
 
-impl<'a> CallBuilder<'a, Operation> for PaymentCallBuilder<'a> {
-    fn new(s: &'a Server) -> Self {
+impl<'a> PaymentCallBuilder<'a> {
+    pub fn new(s: &'a Server) -> Self {
         Self {
             server_url: &s.0,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
         }
     }
+}
 
+impl<'a> CallBuilder<'a, Operation> for PaymentCallBuilder<'a> {
     fn cursor(&mut self, cursor: &'a str) -> &mut Self {
         self.query_params.insert("cursor", cursor);
 

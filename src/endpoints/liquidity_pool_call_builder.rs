@@ -13,6 +13,14 @@ pub struct LiquidityPoolCallBuilder<'a> {
 }
 
 impl<'a> LiquidityPoolCallBuilder<'a> {
+    pub fn new(s: &'a Server) -> Self {
+        Self {
+            server_url: &s.0,
+            endpoint: Endpoint::None,
+            query_params: HashMap::new(),
+        }
+    }
+
     pub fn for_assets(&mut self, assets: Vec<Asset<'a>>) -> &mut Self {
         self.query_params.insert(
             "reserves",
@@ -28,14 +36,6 @@ impl<'a> LiquidityPoolCallBuilder<'a> {
 }
 
 impl<'a> CallBuilder<'a, LiquidityPool> for LiquidityPoolCallBuilder<'a> {
-    fn new(s: &'a Server) -> Self {
-        Self {
-            server_url: &s.0,
-            endpoint: Endpoint::None,
-            query_params: HashMap::new(),
-        }
-    }
-
     fn cursor(&mut self, cursor: &'a str) -> &mut Self {
         self.query_params.insert("cursor", cursor);
 

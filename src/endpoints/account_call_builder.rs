@@ -13,6 +13,14 @@ pub struct AccountCallBuilder<'a> {
 }
 
 impl<'a> AccountCallBuilder<'a> {
+    pub fn new(s: &'a Server) -> Self {
+        AccountCallBuilder {
+            server_url: &s.0,
+            endpoint: Endpoint::None,
+            query_params: HashMap::new(),
+        }
+    }
+
     pub fn sponsor(&mut self, sponsor: &'a str) -> &mut Self {
         self.query_params.insert("sponsor", sponsor);
 
@@ -39,14 +47,6 @@ impl<'a> AccountCallBuilder<'a> {
 }
 
 impl<'a> CallBuilder<'a, Account> for AccountCallBuilder<'a> {
-    fn new(s: &'a Server) -> Self {
-        AccountCallBuilder {
-            server_url: &s.0,
-            endpoint: Endpoint::None,
-            query_params: HashMap::new(),
-        }
-    }
-
     fn call(&self) -> Result<Record<Account>, anyhow::Error> {
         let mut url = format!(
             "{}{}{}",

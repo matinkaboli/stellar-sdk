@@ -13,6 +13,14 @@ pub struct AssetCallBuilder<'a> {
 }
 
 impl<'a> AssetCallBuilder<'a> {
+    pub fn new(s: &'a Server) -> Self {
+        AssetCallBuilder {
+            server_url: &s.0,
+            endpoint: Endpoint::None,
+            query_params: HashMap::new(),
+        }
+    }
+
     pub fn asset_code(&mut self, code: &'a str) -> &mut Self {
         self.query_params.insert("code", code);
 
@@ -27,14 +35,6 @@ impl<'a> AssetCallBuilder<'a> {
 }
 
 impl<'a> CallBuilder<'a, AssetHorizon> for AssetCallBuilder<'a> {
-    fn new(s: &'a Server) -> Self {
-        AssetCallBuilder {
-            server_url: &s.0,
-            endpoint: Endpoint::None,
-            query_params: HashMap::new(),
-        }
-    }
-
     fn cursor(&mut self, cursor: &'a str) -> &mut Self {
         self.query_params.insert("cursor", cursor);
 

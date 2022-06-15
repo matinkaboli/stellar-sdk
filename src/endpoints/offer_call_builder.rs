@@ -13,6 +13,14 @@ pub struct OfferCallBuilder<'a> {
 }
 
 impl<'a> OfferCallBuilder<'a> {
+    pub fn new(s: &'a Server) -> Self {
+        OfferCallBuilder {
+            server_url: &s.0,
+            endpoint: Endpoint::None,
+            query_params: HashMap::new(),
+        }
+    }
+
     pub fn selling(&mut self, asset: &'a Asset) -> &mut Self {
         self.query_params.insert("selling", &asset.as_str());
 
@@ -39,14 +47,6 @@ impl<'a> OfferCallBuilder<'a> {
 }
 
 impl<'a> CallBuilder<'a, Offer> for OfferCallBuilder<'a> {
-    fn new(s: &'a Server) -> Self {
-        OfferCallBuilder {
-            server_url: &s.0,
-            endpoint: Endpoint::None,
-            query_params: HashMap::new(),
-        }
-    }
-
     fn cursor(&mut self, cursor: &'a str) -> &mut Self {
         self.query_params.insert("cursor", cursor);
 
