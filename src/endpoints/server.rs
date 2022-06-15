@@ -9,7 +9,7 @@ use crate::endpoints::{
 };
 use crate::types::{
     Account, Asset, ClaimableBalance, FeeStats, Ledger, LiquidityPool, Offer, Operation,
-    StrictPath, StrictPathSource, Transaction,
+    StrictPathSource, Transaction,
 };
 
 #[derive(Debug)]
@@ -115,22 +115,14 @@ impl Server {
         StrictReceiveCallBuilder::new(self, source, &destination_asset, &destination_amount)
     }
 
-    // pub fn strict_send_paths(
-    //     &self,
-    //     destinatio_account: Option<String>,
-    //     destination_assets: Option<Vec<Asset>>,
-    //     source_asset: Asset,
-    //     source_amount: String,
-    // ) -> StrictSendCallBuilder {
-    //     StrictSendCallBuilder {
-    //         server: self,
-    //         limit: None,
-    //         destination_assets,
-    //         destination_account,
-    //         source_asset,
-    //         source_amount,
-    //     }
-    // }
+    pub fn strict_send_paths<'a>(
+        &'a self,
+        destination: &StrictPathSource<'a>,
+        source_asset: &'a Asset<'a>,
+        source_amount: &'a str,
+    ) -> StrictSendCallBuilder {
+        StrictSendCallBuilder::new(self, destination, source_asset, source_amount)
+    }
 
     pub fn trades(&self) -> TradeCallBuilder {
         TradeCallBuilder::new(&self)
@@ -152,7 +144,7 @@ impl Server {
 
 #[cfg(test)]
 mod tests {
-    use crate::endpoints::call_builder::CallBuilder;
+    use crate::{endpoints::call_builder::CallBuilder, utils::Endpoint};
 
     use super::*;
 

@@ -93,10 +93,14 @@ mod tests {
             "GBDEVU63Y6NTHJQQZIKVTC23NWLQVP3WJ2RI2OTSJTNYOIGICST6DUXR",
         );
 
-        let _ocb =
-            StrictReceiveCallBuilder::new(&s, StrictPathSource::Account("test"), &native, "20")
-                .limit(1)
-                .call()
-                .unwrap();
+        let _ocb = StrictReceiveCallBuilder::new(
+            &s,
+            &StrictPathSource::Account("GBDEVU63Y6NTHJQQZIKVTC23NWLQVP3WJ2RI2OTSJTNYOIGICST6DUXR"),
+            &native,
+            "20",
+        )
+        .limit(1)
+        .call()
+        .unwrap();
     }
 }
