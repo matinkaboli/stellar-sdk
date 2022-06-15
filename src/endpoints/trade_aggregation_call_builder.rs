@@ -26,22 +26,12 @@ impl<'a> TradeAggregationCallBuilder<'a> {
             query_params: HashMap::new(),
         };
 
-        new_self.query_params.insert("base_asset_code", base.0);
-        new_self.query_params.insert("base_asset_issuer", base.1);
         new_self
             .query_params
-            .insert("base_asset_type", &base.get_type());
-
+            .extend(base.as_querystring_v2("base".to_string()));
         new_self
             .query_params
-            .insert("counter_asset_code", counter.0);
-        new_self
-            .query_params
-            .insert("counter_asset_issuer", counter.1);
-        new_self
-            .query_params
-            .insert("counter_asset_type", &counter.get_type());
-
+            .extend(counter.as_querystring_v2("counter".to_string()));
         new_self.query_params.insert("resolution", resolution);
 
         new_self

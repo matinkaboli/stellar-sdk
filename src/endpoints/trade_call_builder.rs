@@ -22,14 +22,9 @@ impl<'a> TradeCallBuilder<'a> {
 
     pub fn for_asset_pair(&mut self, base: Asset<'a>, counter: Asset<'a>) -> &mut Self {
         self.query_params
-            .insert("base_asset_type", &base.get_type());
-        self.query_params.insert("base_asset_code", base.0);
-        self.query_params.insert("base_asset_code", base.1);
-
+            .extend(base.as_querystring_v2(String::from("base")));
         self.query_params
-            .insert("counter_asset_type", &counter.get_type());
-        self.query_params.insert("counter_asset_code", counter.0);
-        self.query_params.insert("counter_asset_code", counter.1);
+            .extend(counter.as_querystring_v2(String::from("counter")));
 
         self
     }

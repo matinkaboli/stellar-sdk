@@ -152,7 +152,7 @@ mod tests {
     #[test]
     fn test_asset_as_querystring() {
         let native = Asset::native();
-        let qs = native.deprecated_as_querystring(String::from("base"));
+        let qs = native.as_querystring(String::from("base"));
 
         assert_eq!("&base_asset_type=native", qs);
 
@@ -161,7 +161,7 @@ mod tests {
             "GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
         );
 
-        let qs = y_usdc.deprecated_as_querystring(String::from("counter"));
+        let qs = y_usdc.as_querystring(String::from("counter"));
 
         assert_eq!(
             "&counter_asset_type=credit_alphanum12&counter_asset_code=yUSDC&counter_asset_issuer=GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
