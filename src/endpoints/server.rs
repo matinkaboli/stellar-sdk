@@ -93,20 +93,20 @@ impl Server {
         ClaimableBalanceCallbuilder::new(self)
     }
 
-    // pub fn trade_aggregations<'a>(
-    //     &self,
-    //     base: Asset,
-    //     counter: Asset,
-    //     resolution: String,
-    // ) -> TradeAggregationCallBuilder {
-    //     TradeAggregationCallBuilder {
-    //         server: self,
-    //         limit: None,
-    //         base,
-    //         counter,
-    //         resolution,
-    //     }
-    // }
+    pub fn trade_aggregations<'a>(
+        &self,
+        base: Asset,
+        counter: Asset,
+        resolution: String,
+    ) -> TradeAggregationCallBuilder {
+        TradeAggregationCallBuilder {
+            server: self,
+            limit: None,
+            base,
+            counter,
+            resolution,
+        }
+    }
 
     pub fn order_books<'a>(
         &'a self,
@@ -163,13 +163,9 @@ impl Server {
         AssetCallBuilder::new(self)
     }
 
-    pub fn fee_stats(&self) -> Result<FeeStats, &str> {
+    pub fn fee_stats(&self) -> Result<FeeStats, anyhow::Error> {
         let url = format!("{}/fee_stats", self.0);
-        let resp = req(&url).unwrap();
-
-        let parsed: FeeStats = serde_json::from_str(&resp).unwrap();
-
-        Ok(parsed)
+        api_call::<FeeStats>(url, crate::types::HttpMethod::GET, HashMap::new())
     }
 }
 

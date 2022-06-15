@@ -1,14 +1,16 @@
+use std::collections::HashMap;
+
+use crate::api_call::api_call;
 use crate::endpoints::{horizon::Record, Server};
 use crate::types::{Asset, TradeAggregation};
-use crate::utils::req;
+use crate::utils::{Direction, Endpoint};
+use crate::CallBuilder;
 
 #[derive(Debug)]
 pub struct TradeAggregationCallBuilder<'a> {
-    pub server: &'a Server,
-    pub limit: Option<u8>,
-    pub base: &'a Asset<'a>,
-    pub counter: &'a Asset<'a>,
-    pub resolution: String,
+    server_url: &'a str,
+    endpoint: Endpoint,
+    query_params: HashMap<&'a str, &'a str>,
 }
 
 impl<'a> TradeAggregationCallBuilder<'a> {
@@ -18,37 +20,62 @@ impl<'a> TradeAggregationCallBuilder<'a> {
         counter: &'a Asset<'a>,
         resolution: &'a str,
     ) -> Self {
-        Self {
-            server: s,
-            limit: None,
-            base,
-            counter,
-            resolution: String::from(resolution),
-        }
-    }
+        let new_self = Self {
+            server_url: &s.0,
+            endpoint: Endpoint::None,
+            query_params: HashMap::new(),
+        };
 
-    pub fn limit(&mut self, limit: u8) -> &mut Self {
-        self.limit = Some(limit);
+        new_self.query_params.insert("base_asset_code", base.0);
+        new_self.query_params.insert("base_asset_issuer", base.1);
+        new_self
+            .query_params
+            .insert("base_asset_type", &base.get_type());
+
+        new_self
+            .query_params
+            .insert("counter_asset_code", counter.0);
+        new_self
+            .query_params
+            .insert("counter_asset_issuer", counter.1);
+        new_self
+            .query_params
+            .insert("counter_asset_type", &counter.get_type());
+
+        new_self.query_params.insert("resolution", resolution);
+
+        new_self
+    }
+}
+
+impl<'a> CallBuilder<'a, TradeAggregation> for TradeAggregationCallBuilder<'a> {
+    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
+        self.query_params.insert("cursor", cursor);
 
         self
     }
 
-    pub fn call(&self) -> Result<Record<TradeAggregation>, &str> {
-        let mut url = format!("{}{}", &self.server.0, "/trade_aggregations?");
+    fn order(&mut self, dir: Direction) -> &mut Self {
+        self.query_params.insert("order", dir.as_str());
 
-        if let Some(x) = &self.limit {
-            url.push_str(&format!("&limit={}", x));
-        }
+        self
+    }
 
-        url.push_str(&self.base.as_querystring(String::from("base")));
-        url.push_str(&self.counter.as_querystring(String::from("counter")));
-        url.push_str(&format!("&resolution={}", self.resolution));
+    fn limit(&mut self, limit: u8) -> &mut Self {
+        self.query_params.insert("limit", &limit.to_string());
 
-        let resp = req(&url).unwrap();
+        self
+    }
 
-        let p: Record<TradeAggregation> = serde_json::from_str(&resp).unwrap();
+    fn for_endpoint(&mut self, endpoint: Endpoint) -> &mut Self {
+        self.endpoint = endpoint;
 
-        Ok(p)
+        self
+    }
+
+    fn call(&self) -> Result<Record<TradeAggregation>, anyhow::Error> {
+        let mut url = format!("{}{}", &self.server_url, "/trade_aggregations");
+        api_call::<Record<TradeAggregation>>(url, crate::types::HttpMethod::GET, self.query_params)
     }
 }
 
