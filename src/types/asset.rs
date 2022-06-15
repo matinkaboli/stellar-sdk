@@ -57,7 +57,7 @@ impl<'a> Asset<'a> {
     }
 
     pub fn as_querystring_v2(&self, name: String) -> HashMap<String, String> {
-        let query_string = HashMap::<String, String>::new();
+        let mut query_string = HashMap::<String, String>::new();
         if self.get_type() == "native" {
             query_string.insert(format!("&{}_asset_type", name), String::from("native"));
             return query_string;
