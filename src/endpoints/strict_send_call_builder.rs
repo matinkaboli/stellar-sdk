@@ -54,7 +54,11 @@ impl<'a> StrictSendCallBuilder<'a> {
         }
 
         url.push_str(&format!("&source_amount={}", self.source_amount));
-        url.push_str(&self.source_asset.as_querystring(String::from("source")));
+        url.push_str(
+            &self
+                .source_asset
+                .deprecated_as_querystring(String::from("source")),
+        );
 
         let resp = req(&url).unwrap();
 

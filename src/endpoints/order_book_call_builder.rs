@@ -33,8 +33,16 @@ impl<'a> OrderBookCallBuilder<'a> {
             url.push_str(&format!("&limit={}", x));
         }
 
-        url.push_str(&self.selling.as_querystring(String::from("selling")));
-        url.push_str(&self.buying.as_querystring(String::from("buying")));
+        url.push_str(
+            &self
+                .selling
+                .deprecated_as_querystring(String::from("selling")),
+        );
+        url.push_str(
+            &self
+                .buying
+                .deprecated_as_querystring(String::from("buying")),
+        );
 
         let resp = req(&url).unwrap();
 

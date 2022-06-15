@@ -1,70 +1,81 @@
+use std::collections::HashMap;
+
+use crate::api_call::api_call;
 use crate::endpoints::{horizon::Record, Server};
-use crate::types::{Asset, StrictPath};
-use crate::utils::req;
+use crate::types::{Asset, StrictPath, StrictPathSource};
+use crate::utils::{Direction, Endpoint};
+use crate::CallBuilder;
 
 #[derive(Debug)]
 pub struct StrictReceiveCallBuilder<'a> {
-    pub server: &'a Server,
-    pub limit: Option<u8>,
-    pub source_account: Option<String>,
-    pub source_assets: Option<Vec<&'a Asset<'a>>>,
-    pub destination_asset: &'a Asset<'a>,
-    pub destination_amount: String,
+    server_url: &'a str,
+    query_params: HashMap<&'a str, &'a str>,
+}
+
+impl<'a> CallBuilder<'a, StrictPath> for StrictReceiveCallBuilder<'a> {
+    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
+        self.query_params.insert("cursor", cursor);
+
+        self
+    }
+
+    fn order(&mut self, dir: Direction) -> &mut Self {
+        self.query_params.insert("order", dir.as_str());
+
+        self
+    }
+
+    fn limit(&mut self, limit: u8) -> &mut Self {
+        self.query_params.insert("limit", &limit.to_string());
+
+        self
+    }
+
+    fn for_endpoint(&mut self, endpoint: Endpoint) -> &mut Self {
+        self
+    }
+
+    fn call(&self) -> Result<Record<StrictPath>, anyhow::Error> {
+        let mut url = format!("{}{}", &self.server_url, "/paths/strict-receive");
+        api_call::<Record<StrictPath>>(url, crate::types::HttpMethod::GET, self.query_params)
+    }
 }
 
 impl<'a> StrictReceiveCallBuilder<'a> {
     pub fn new(
         s: &'a Server,
-        source_account: Option<String>,
-        source_assets: Option<Vec<&'a Asset<'a>>>,
+        source: &StrictPathSource<'a>,
         destination_asset: &'a Asset<'a>,
         destination_amount: &'a str,
     ) -> Self {
-        Self {
-            server: s,
-            limit: None,
-            source_account,
-            source_assets,
-            destination_asset,
-            destination_amount: String::from(destination_amount),
-        }
-    }
+        let new_self = Self {
+            server_url: &s.0,
+            query_params: HashMap::new(),
+        };
 
-    pub fn limit(&mut self, limit: u8) -> &mut Self {
-        self.limit = Some(limit);
+        match source {
+            StrictPathSource::Account(account) => {
+                new_self.query_params.insert("source_account", account)
+            }
+            StrictPathSource::Assets(assets) => new_self.query_params.insert(
+                "source_assets",
+                &assets
+                    .into_iter()
+                    .map(|asset| asset.as_str())
+                    .collect::<Vec<String>>()
+                    .join(","),
+            ),
+        };
 
-        self
-    }
+        new_self
+            .query_params
+            .extend(destination_asset.as_querystring_v2("destination".to_string()));
 
-    pub fn call(&self) -> Result<Record<StrictPath>, &str> {
-        let mut url = format!("{}{}", &self.server.0, "/paths/strict-receive?");
+        new_self
+            .query_params
+            .insert("destination_amount", destination_amount);
 
-        if let Some(x) = &self.limit {
-            url.push_str(&format!("&limit={}", x));
-        }
-
-        if let Some(x) = &self.source_account {
-            url.push_str(&format!("&source_account={}", x));
-        }
-        if let Some(x) = &self.source_assets {
-            let v: Vec<String> = x.iter().map(|&ast| ast.as_str()).collect();
-            let v = v.join(",");
-
-            url.push_str(&format!("&source_assets={}", v));
-        }
-
-        url.push_str(&format!("&destination_amount={}", self.destination_amount));
-        url.push_str(
-            &self
-                .destination_asset
-                .as_querystring(String::from("destination")),
-        );
-
-        let resp = req(&url).unwrap();
-
-        let p: Record<StrictPath> = serde_json::from_str(&resp).unwrap();
-
-        Ok(p)
+        new_self
     }
 }
 
@@ -82,9 +93,10 @@ mod tests {
             "GBDEVU63Y6NTHJQQZIKVTC23NWLQVP3WJ2RI2OTSJTNYOIGICST6DUXR",
         );
 
-        let _ocb = StrictReceiveCallBuilder::new(&s, None, Some(vec![&bat]), &native, "20")
-            .limit(1)
-            .call()
-            .unwrap();
+        let _ocb =
+            StrictReceiveCallBuilder::new(&s, StrictPathSource::Account("test"), &native, "20")
+                .limit(1)
+                .call()
+                .unwrap();
     }
 }

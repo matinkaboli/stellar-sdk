@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Debug)]
 pub struct Asset<'a>(pub &'a str, pub &'a str, pub bool);
 
@@ -37,6 +39,7 @@ impl<'a> Asset<'a> {
         Self(vec[0], vec[1], false)
     }
 
+    #[deprecated]
     pub fn as_querystring(&self, name: String) -> String {
         if self.get_type() == "native" {
             return format!("&{}_asset_type={}", name, "native");
@@ -51,6 +54,19 @@ impl<'a> Asset<'a> {
             name,
             self.1,
         )
+    }
+
+    pub fn as_querystring_v2(&self, name: String) -> HashMap<&str, &str> {
+        let query_string = HashMap::<&str, &str>::new();
+        if self.get_type() == "native" {
+            query_string.insert(&format!("&{}_asset_type", name), "native");
+            return query_string;
+        }
+
+        query_string.insert(&format!("&{}_asset_type", name), &self.get_type());
+        query_string.insert(&format!("&{}_asset_code", name), &self.0);
+        query_string.insert(&format!("&{}_asset_issuer", name), &self.1);
+        query_string
     }
 }
 
@@ -136,7 +152,7 @@ mod tests {
     #[test]
     fn test_asset_as_querystring() {
         let native = Asset::native();
-        let qs = native.as_querystring(String::from("base"));
+        let qs = native.deprecated_as_querystring(String::from("base"));
 
         assert_eq!("&base_asset_type=native", qs);
 
@@ -145,7 +161,7 @@ mod tests {
             "GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
         );
 
-        let qs = y_usdc.as_querystring(String::from("counter"));
+        let qs = y_usdc.deprecated_as_querystring(String::from("counter"));
 
         assert_eq!(
             "&counter_asset_type=credit_alphanum12&counter_asset_code=yUSDC&counter_asset_issuer=GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
