@@ -10,17 +10,12 @@ use crate::CallBuilder;
 pub struct TradeAggregationCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
-    query_params: HashMap<&'a str, &'a str>,
+    query_params: HashMap<String, String>,
 }
 
 impl<'a> TradeAggregationCallBuilder<'a> {
-    pub fn new(
-        s: &'a Server,
-        base: &'a Asset<'a>,
-        counter: &'a Asset<'a>,
-        resolution: &'a str,
-    ) -> Self {
-        let new_self = Self {
+    pub fn new(s: &'a Server, base: &Asset, counter: &Asset, resolution: &str) -> Self {
+        let mut new_self = Self {
             server_url: &s.0,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
@@ -32,27 +27,32 @@ impl<'a> TradeAggregationCallBuilder<'a> {
         new_self
             .query_params
             .extend(counter.as_querystring_v2("counter".to_string()));
-        new_self.query_params.insert("resolution", resolution);
+        new_self
+            .query_params
+            .insert(String::from("resolution"), String::from(resolution));
 
         new_self
     }
 }
 
-impl<'a> CallBuilder<'a, TradeAggregation> for TradeAggregationCallBuilder<'a> {
-    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
-        self.query_params.insert("cursor", cursor);
+impl<'a> CallBuilder<TradeAggregation> for TradeAggregationCallBuilder<'a> {
+    fn cursor(&mut self, cursor: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("cursor"), String::from(cursor));
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.query_params.insert("order", dir.as_str());
+        self.query_params
+            .insert(String::from("order"), String::from(dir.as_str()));
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.query_params.insert("limit", &limit.to_string());
+        self.query_params
+            .insert(String::from("limit"), limit.to_string());
 
         self
     }
@@ -64,8 +64,8 @@ impl<'a> CallBuilder<'a, TradeAggregation> for TradeAggregationCallBuilder<'a> {
     }
 
     fn call(&self) -> Result<Record<TradeAggregation>, anyhow::Error> {
-        let mut url = format!("{}{}", &self.server_url, "/trade_aggregations");
-        api_call::<Record<TradeAggregation>>(url, crate::types::HttpMethod::GET, self.query_params)
+        let url = format!("{}{}", &self.server_url, "/trade_aggregations");
+        api_call::<Record<TradeAggregation>>(url, crate::types::HttpMethod::GET, &self.query_params)
     }
 }
 

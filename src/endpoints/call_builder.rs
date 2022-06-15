@@ -3,8 +3,8 @@ use crate::{
     utils::{Direction, Endpoint},
 };
 
-pub trait CallBuilder<'a, T> {
-    fn cursor(&mut self, cursor: &'a str) -> &mut Self;
+pub trait CallBuilder<T> {
+    fn cursor(&mut self, cursor: &str) -> &mut Self;
     fn order(&mut self, dir: Direction) -> &mut Self;
     fn limit(&mut self, limit_number: u8) -> &mut Self;
     fn call(&self) -> Result<Record<T>, anyhow::Error>;

@@ -9,7 +9,7 @@ use crate::utils::{Direction, Endpoint};
 pub struct AssetCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
-    query_params: HashMap<&'a str, &'a str>,
+    query_params: HashMap<String, String>,
 }
 
 impl<'a> AssetCallBuilder<'a> {
@@ -21,34 +21,39 @@ impl<'a> AssetCallBuilder<'a> {
         }
     }
 
-    pub fn asset_code(&mut self, code: &'a str) -> &mut Self {
-        self.query_params.insert("code", code);
+    pub fn asset_code(&mut self, code: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("code"), String::from(code));
 
         self
     }
 
-    pub fn asset_issuer(&mut self, issuer: &'a str) -> &mut Self {
-        self.query_params.insert("issuer", issuer);
+    pub fn asset_issuer(&mut self, issuer: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("issuer"), String::from(issuer));
 
         self
     }
 }
 
-impl<'a> CallBuilder<'a, AssetHorizon> for AssetCallBuilder<'a> {
-    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
-        self.query_params.insert("cursor", cursor);
+impl<'a> CallBuilder<AssetHorizon> for AssetCallBuilder<'a> {
+    fn cursor(&mut self, cursor: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("cursor"), String::from(cursor));
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.query_params.insert("order", dir.as_str());
+        self.query_params
+            .insert(String::from("order"), String::from(dir.as_str()));
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.query_params.insert("limit", &limit.to_string());
+        self.query_params
+            .insert(String::from("limit"), limit.to_string());
 
         self
     }
@@ -67,7 +72,7 @@ impl<'a> CallBuilder<'a, AssetHorizon> for AssetCallBuilder<'a> {
             "/assets",
         );
 
-        api_call::<Record<AssetHorizon>>(url, crate::types::HttpMethod::GET, self.query_params)
+        api_call::<Record<AssetHorizon>>(url, crate::types::HttpMethod::GET, &self.query_params)
     }
 }
 

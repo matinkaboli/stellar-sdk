@@ -9,7 +9,7 @@ use crate::utils::{Direction, Endpoint};
 pub struct OfferCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
-    query_params: HashMap<&'a str, &'a str>,
+    query_params: HashMap<String, String>,
 }
 
 impl<'a> OfferCallBuilder<'a> {
@@ -21,46 +21,53 @@ impl<'a> OfferCallBuilder<'a> {
         }
     }
 
-    pub fn selling(&mut self, asset: &'a Asset) -> &mut Self {
-        self.query_params.insert("selling", &asset.as_str());
+    pub fn selling(&mut self, asset: &Asset) -> &mut Self {
+        self.query_params
+            .insert(String::from("selling"), asset.as_str());
 
         self
     }
 
-    pub fn buying(&mut self, asset: &'a Asset) -> &mut Self {
-        self.query_params.insert("buying", &asset.as_str());
+    pub fn buying(&mut self, asset: &Asset) -> &mut Self {
+        self.query_params
+            .insert(String::from("buying"), asset.as_str());
 
         self
     }
 
-    pub fn seller(&mut self, seller: &'a str) -> &mut Self {
-        self.query_params.insert("seller", seller);
+    pub fn seller(&mut self, seller: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("seller"), String::from(seller));
 
         self
     }
 
-    pub fn sponsor(&mut self, sponsor: &'a str) -> &mut Self {
-        self.query_params.insert("sponsor", sponsor);
+    pub fn sponsor(&mut self, sponsor: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("sponsor"), String::from(sponsor));
 
         self
     }
 }
 
-impl<'a> CallBuilder<'a, Offer> for OfferCallBuilder<'a> {
-    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
-        self.query_params.insert("cursor", cursor);
+impl<'a> CallBuilder<Offer> for OfferCallBuilder<'a> {
+    fn cursor(&mut self, cursor: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("cursor"), String::from(cursor));
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.query_params.insert("order", dir.as_str());
+        self.query_params
+            .insert(String::from("order"), String::from(dir.as_str()));
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.query_params.insert("limit", &limit.to_string());
+        self.query_params
+            .insert(String::from("limit"), limit.to_string());
 
         self
     }
@@ -72,14 +79,14 @@ impl<'a> CallBuilder<'a, Offer> for OfferCallBuilder<'a> {
     }
 
     fn call(&self) -> Result<Record<Offer>, anyhow::Error> {
-        let mut url = format!(
+        let url = format!(
             "{}{}{}",
             &self.server_url,
             self.endpoint.as_str(),
             "/offers"
         );
 
-        api_call::<Record<Offer>>(url, crate::types::HttpMethod::GET, self.query_params)
+        api_call::<Record<Offer>>(url, crate::types::HttpMethod::GET, &self.query_params)
     }
 }
 

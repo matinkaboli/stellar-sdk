@@ -9,7 +9,7 @@ use crate::utils::{Direction, Endpoint};
 pub struct LedgerCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
-    query_params: HashMap<&'a str, &'a str>,
+    query_params: HashMap<String, String>,
 }
 
 impl<'a> LedgerCallBuilder<'a> {
@@ -22,21 +22,24 @@ impl<'a> LedgerCallBuilder<'a> {
     }
 }
 
-impl<'a> CallBuilder<'a, Ledger> for LedgerCallBuilder<'a> {
-    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
-        self.query_params.insert("cursor", cursor);
+impl<'a> CallBuilder<Ledger> for LedgerCallBuilder<'a> {
+    fn cursor(&mut self, cursor: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("cursor"), String::from(cursor));
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.query_params.insert("order", dir.as_str());
+        self.query_params
+            .insert(String::from("order"), String::from(dir.as_str()));
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.query_params.insert("limit", &limit.to_string());
+        self.query_params
+            .insert(String::from("limit"), limit.to_string());
 
         self
     }
@@ -48,14 +51,14 @@ impl<'a> CallBuilder<'a, Ledger> for LedgerCallBuilder<'a> {
     }
 
     fn call(&self) -> Result<Record<Ledger>, anyhow::Error> {
-        let mut url = format!(
+        let url = format!(
             "{}{}{}",
             &self.server_url,
             self.endpoint.as_str(),
             "/ledgers",
         );
 
-        api_call::<Record<Ledger>>(url, crate::types::HttpMethod::GET, self.query_params)
+        api_call::<Record<Ledger>>(url, crate::types::HttpMethod::GET, &self.query_params)
     }
 }
 

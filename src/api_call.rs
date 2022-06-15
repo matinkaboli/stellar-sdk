@@ -8,7 +8,7 @@ use crate::types::{HorizonError, HttpMethod};
 pub fn api_call<'a, T: Deserialize<'a>>(
     url: String,
     method: HttpMethod,
-    query_params: HashMap<&str, &str>,
+    query_params: &HashMap<String, String>,
 ) -> Result<T, anyhow::Error> {
     let req: ureq::Request;
 

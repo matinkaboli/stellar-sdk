@@ -8,7 +8,7 @@ use std::collections::HashMap;
 pub struct TradeCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
-    query_params: HashMap<&'a str, &'a str>,
+    query_params: HashMap<String, String>,
 }
 
 impl<'a> TradeCallBuilder<'a> {
@@ -20,7 +20,7 @@ impl<'a> TradeCallBuilder<'a> {
         }
     }
 
-    pub fn for_asset_pair(&mut self, base: Asset<'a>, counter: Asset<'a>) -> &mut Self {
+    pub fn for_asset_pair(&mut self, base: &Asset, counter: &Asset) -> &mut Self {
         self.query_params
             .extend(base.as_querystring_v2(String::from("base")));
         self.query_params
@@ -29,45 +29,50 @@ impl<'a> TradeCallBuilder<'a> {
         self
     }
 
-    pub fn for_offer(&mut self, offer_id: &'a str) -> &mut Self {
-        self.query_params.insert("offer_id", offer_id);
+    pub fn for_offer(&mut self, offer_id: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("offer_id"), String::from(offer_id));
 
         self
     }
 
     pub fn for_type(&mut self, f_type: TradeType) -> &mut Self {
-        self.query_params.insert("trade_type", &f_type.as_str());
+        self.query_params
+            .insert(String::from("trade_type"), f_type.as_str());
 
         self
     }
 }
 
-impl<'a> CallBuilder<'a, Trade> for TradeCallBuilder<'a> {
+impl<'a> CallBuilder<Trade> for TradeCallBuilder<'a> {
     fn call(&self) -> Result<Record<Trade>, anyhow::Error> {
-        let mut url = format!(
+        let url = format!(
             "{}{}{}",
             &self.server_url,
             self.endpoint.as_str(),
             "/trades",
         );
 
-        api_call::<Record<Trade>>(url, crate::types::HttpMethod::GET, self.query_params)
+        api_call::<Record<Trade>>(url, crate::types::HttpMethod::GET, &self.query_params)
     }
 
-    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
-        self.query_params.insert("cursor", cursor);
+    fn cursor(&mut self, cursor: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("cursor"), String::from(cursor));
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.query_params.insert("order", dir.as_str());
+        self.query_params
+            .insert(String::from("order"), String::from(dir.as_str()));
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.query_params.insert("limit", &limit.to_string());
+        self.query_params
+            .insert(String::from("limit"), limit.to_string());
 
         self
     }
@@ -105,7 +110,11 @@ mod tests {
         );
         let mut tcb = TradeCallBuilder::new(&s);
 
-        let records = tcb.for_asset_pair(native, y_usdc).limit(2).call().unwrap();
+        let records = tcb
+            .for_asset_pair(&native, &y_usdc)
+            .limit(2)
+            .call()
+            .unwrap();
 
         assert_eq!(records._embedded.records.len(), 2);
     }

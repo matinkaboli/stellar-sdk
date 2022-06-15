@@ -9,69 +9,76 @@ use crate::utils::{Direction, Endpoint};
 pub struct AccountCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
-    query_params: HashMap<&'a str, &'a str>,
+    query_params: HashMap<String, String>,
 }
 
 impl<'a> AccountCallBuilder<'a> {
     pub fn new(s: &'a Server) -> Self {
-        AccountCallBuilder {
+        Self {
             server_url: &s.0,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
         }
     }
 
-    pub fn sponsor(&mut self, sponsor: &'a str) -> &mut Self {
-        self.query_params.insert("sponsor", sponsor);
+    pub fn sponsor(&mut self, sponsor: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("sponsor"), String::from(sponsor));
 
         self
     }
 
-    pub fn signer(&mut self, signer: &'a str) -> &mut Self {
-        self.query_params.insert("signer", signer);
+    pub fn signer(&mut self, signer: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("signer"), String::from(signer));
 
         self
     }
 
-    pub fn liquidity_pool(&mut self, liquidity_id: &'a str) -> &mut Self {
-        self.query_params.insert("liquidity_pool", liquidity_id);
+    pub fn liquidity_pool(&mut self, liquidity_id: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("liquidity_pool"), String::from(liquidity_id));
 
         self
     }
 
-    pub fn asset(&mut self, asset: &'a Asset) -> &mut Self {
-        self.query_params.insert("asset", &asset.as_str());
+    pub fn asset(&mut self, asset: &Asset) -> &mut Self {
+        self.query_params
+            .insert(String::from("asset"), asset.as_str());
 
         self
     }
 }
 
-impl<'a> CallBuilder<'a, Account> for AccountCallBuilder<'a> {
+impl<'a> CallBuilder<Account> for AccountCallBuilder<'a> {
     fn call(&self) -> Result<Record<Account>, anyhow::Error> {
-        let mut url = format!(
+        let url = format!(
             "{}{}{}",
             &self.server_url,
             self.endpoint.as_str(),
             "/accounts",
         );
 
-        api_call::<Record<Account>>(url, crate::types::HttpMethod::GET, self.query_params)
+        api_call::<Record<Account>>(url, crate::types::HttpMethod::GET, &self.query_params)
     }
 
-    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
-        self.query_params.insert("cursor", cursor);
+    fn cursor(&mut self, cursor: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("cursor"), String::from(cursor));
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.query_params.insert("order", dir.as_str());
+        self.query_params
+            .insert(String::from("order"), String::from(dir.as_str()));
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.query_params.insert("limit", &limit.to_string());
+        self.query_params
+            .insert(String::from("limit"), limit.to_string());
 
         self
     }

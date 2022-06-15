@@ -9,7 +9,7 @@ use crate::utils::{Direction, Endpoint};
 pub struct ClaimableBalanceCallbuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
-    query_params: HashMap<&'a str, &'a str>,
+    query_params: HashMap<String, String>,
 }
 
 impl<'a> ClaimableBalanceCallbuilder<'a> {
@@ -21,40 +21,46 @@ impl<'a> ClaimableBalanceCallbuilder<'a> {
         }
     }
 
-    pub fn sponsor(&mut self, sponsor: &'a str) -> &mut Self {
-        self.query_params.insert("sponsor", sponsor);
+    pub fn sponsor(&mut self, sponsor: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("sponsor"), String::from(sponsor));
 
         self
     }
 
-    pub fn asset(&mut self, asset: &'a Asset<'a>) -> &mut Self {
-        self.query_params.insert("asset", &asset.as_str());
+    pub fn asset(&mut self, asset: &Asset) -> &mut Self {
+        self.query_params
+            .insert(String::from("asset"), asset.as_str());
 
         self
     }
 
-    pub fn claimant(&mut self, claimant: &'a str) -> &mut Self {
-        self.query_params.insert("claimant", claimant);
+    pub fn claimant(&mut self, claimant: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("claimant"), String::from(claimant));
 
         self
     }
 }
 
-impl<'a> CallBuilder<'a, ClaimableBalance> for ClaimableBalanceCallbuilder<'a> {
-    fn cursor(&mut self, cursor: &'a str) -> &mut Self {
-        self.query_params.insert("cursor", cursor);
+impl<'a> CallBuilder<ClaimableBalance> for ClaimableBalanceCallbuilder<'a> {
+    fn cursor(&mut self, cursor: &str) -> &mut Self {
+        self.query_params
+            .insert(String::from("cursor"), String::from(cursor));
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.query_params.insert("order", dir.as_str());
+        self.query_params
+            .insert(String::from("order"), String::from(dir.as_str()));
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.query_params.insert("limit", &limit.to_string());
+        self.query_params
+            .insert(String::from("limit"), limit.to_string());
 
         self
     }
@@ -66,14 +72,14 @@ impl<'a> CallBuilder<'a, ClaimableBalance> for ClaimableBalanceCallbuilder<'a> {
     }
 
     fn call(&self) -> Result<Record<ClaimableBalance>, anyhow::Error> {
-        let mut url = format!(
+        let url = format!(
             "{}{}{}",
             &self.server_url,
             self.endpoint.as_str(),
             "/claimable_balances",
         );
 
-        api_call::<Record<ClaimableBalance>>(url, crate::types::HttpMethod::GET, self.query_params)
+        api_call::<Record<ClaimableBalance>>(url, crate::types::HttpMethod::GET, &self.query_params)
     }
 }
 

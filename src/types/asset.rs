@@ -56,16 +56,16 @@ impl<'a> Asset<'a> {
         )
     }
 
-    pub fn as_querystring_v2(&self, name: String) -> HashMap<&str, &str> {
-        let query_string = HashMap::<&str, &str>::new();
+    pub fn as_querystring_v2(&self, name: String) -> HashMap<String, String> {
+        let query_string = HashMap::<String, String>::new();
         if self.get_type() == "native" {
-            query_string.insert(&format!("&{}_asset_type", name), "native");
+            query_string.insert(format!("&{}_asset_type", name), String::from("native"));
             return query_string;
         }
 
-        query_string.insert(&format!("&{}_asset_type", name), &self.get_type());
-        query_string.insert(&format!("&{}_asset_code", name), &self.0);
-        query_string.insert(&format!("&{}_asset_issuer", name), &self.1);
+        query_string.insert(format!("&{}_asset_type", name), self.get_type());
+        query_string.insert(format!("&{}_asset_code", name), String::from(self.0));
+        query_string.insert(format!("&{}_asset_issuer", name), String::from(self.1));
         query_string
     }
 }
