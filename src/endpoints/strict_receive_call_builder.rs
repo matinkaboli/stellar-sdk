@@ -63,7 +63,7 @@ impl<'a> StrictReceiveCallBuilder<'a> {
             StrictPathSource::Assets(assets) => new_self.query_params.insert(
                 String::from("source_assets"),
                 assets
-                    .into_iter()
+                    .iter()
                     .map(|asset| asset.as_str())
                     .collect::<Vec<String>>()
                     .join(","),
@@ -72,7 +72,7 @@ impl<'a> StrictReceiveCallBuilder<'a> {
 
         new_self
             .query_params
-            .extend(destination_asset.as_querystring_v2("destination".to_string()));
+            .extend(destination_asset.as_querystring_hashmap("destination".to_string()));
 
         new_self.query_params.insert(
             String::from("destination_amount"),

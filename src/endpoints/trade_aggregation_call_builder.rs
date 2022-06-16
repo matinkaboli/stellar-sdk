@@ -23,10 +23,10 @@ impl<'a> TradeAggregationCallBuilder<'a> {
 
         new_self
             .query_params
-            .extend(base.as_querystring_v2("base".to_string()));
+            .extend(base.as_querystring_hashmap("base".to_string()));
         new_self
             .query_params
-            .extend(counter.as_querystring_v2("counter".to_string()));
+            .extend(counter.as_querystring_hashmap("counter".to_string()));
         new_self
             .query_params
             .insert(String::from("resolution"), String::from(resolution));

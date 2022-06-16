@@ -1,46 +1,52 @@
+use std::collections::HashMap;
+
+use crate::api_call::api_call;
 use crate::endpoints::Server;
 use crate::types::{Asset, OrderBook};
-use crate::utils::req;
+use crate::utils::Endpoint;
 
 #[derive(Debug)]
 pub struct OrderBookCallBuilder<'a> {
-    server: &'a Server,
-    limit: Option<u8>,
-    selling: &'a Asset<'a>,
-    buying: &'a Asset<'a>,
+    server_url: &'a str,
+    endpoint: Endpoint,
+    query_params: HashMap<String, String>,
 }
 
 impl<'a> OrderBookCallBuilder<'a> {
     pub fn new(s: &'a Server, selling: &'a Asset<'a>, buying: &'a Asset<'a>) -> Self {
-        Self {
-            server: s,
-            limit: None,
-            selling,
-            buying,
-        }
+        let mut new_self = Self {
+            server_url: &s.0,
+            endpoint: Endpoint::None,
+            query_params: HashMap::new(),
+        };
+
+        new_self
+            .query_params
+            .extend(selling.as_querystring_hashmap(String::from("selling")));
+
+        new_self
+            .query_params
+            .extend(buying.as_querystring_hashmap(String::from("buying")));
+
+        new_self
     }
 
     pub fn limit(&mut self, limit: u8) -> &mut Self {
-        self.limit = Some(limit);
+        self.query_params
+            .insert(String::from("limit"), limit.to_string());
 
         self
     }
 
-    pub fn call(&self) -> Result<OrderBook, &str> {
-        let mut url = format!("{}{}", &self.server.0, "/order_book?");
+    pub fn call(&self) -> Result<OrderBook, anyhow::Error> {
+        let url = format!(
+            "{}{}{}",
+            &self.server_url,
+            self.endpoint.as_str(),
+            "/order_book"
+        );
 
-        if let Some(x) = &self.limit {
-            url.push_str(&format!("&limit={}", x));
-        }
-
-        url.push_str(&self.selling.as_querystring(String::from("selling")));
-        url.push_str(&self.buying.as_querystring(String::from("buying")));
-
-        let resp = req(&url).unwrap();
-
-        let p: OrderBook = serde_json::from_str(&resp).unwrap();
-
-        Ok(p)
+        api_call::<OrderBook>(url, crate::types::HttpMethod::GET, &self.query_params)
     }
 }
 

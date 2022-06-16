@@ -22,7 +22,8 @@ pub fn api_call<T: DeserializeOwned>(
     match req.call() {
         Ok(res) => {
             let res_str = res.into_string()?;
-            return Ok(serde_json::from_str::<T>(&res_str)?);
+
+            Ok(serde_json::from_str::<T>(&res_str)?)
         }
         Err(e) => match e {
             UreqError::Status(code, res) => {
@@ -33,7 +34,7 @@ pub fn api_call<T: DeserializeOwned>(
                 let res_str = res.into_string()?;
                 let parsed: HorizonError = serde_json::from_str(&res_str)?;
 
-                return Err(parsed.into());
+                Err(parsed.into())
             }
             _ => bail!("failed"),
         },

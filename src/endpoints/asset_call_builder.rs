@@ -65,7 +65,7 @@ impl<'a> CallBuilder<AssetHorizon> for AssetCallBuilder<'a> {
     }
 
     fn call(&self) -> Result<Record<AssetHorizon>, anyhow::Error> {
-        let mut url = format!(
+        let url = format!(
             "{}{}{}",
             &self.server_url,
             self.endpoint.as_str(),

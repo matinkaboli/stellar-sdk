@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 #[derive(Debug)]
 pub struct Asset<'a>(pub &'a str, pub &'a str, pub bool);
@@ -32,13 +32,6 @@ impl<'a> Asset<'a> {
         String::from("credit_alphanum12")
     }
 
-    pub fn from_str(ast: &'a str) -> Self {
-        let splitted = ast.split(':');
-        let vec: Vec<&str> = splitted.collect();
-
-        Self(vec[0], vec[1], false)
-    }
-
     #[deprecated]
     pub fn as_querystring(&self, name: String) -> String {
         if self.get_type() == "native" {
@@ -56,7 +49,7 @@ impl<'a> Asset<'a> {
         )
     }
 
-    pub fn as_querystring_v2(&self, name: String) -> HashMap<String, String> {
+    pub fn as_querystring_hashmap(&self, name: String) -> HashMap<String, String> {
         let mut query_string = HashMap::<String, String>::new();
         if self.get_type() == "native" {
             query_string.insert(format!("&{}_asset_type", name), String::from("native"));
@@ -70,6 +63,17 @@ impl<'a> Asset<'a> {
     }
 }
 
+impl<'a> FromStr for Asset<'a> {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, ()> {
+        let e = Box::new(s);
+
+        let parts = *e.split(':').collect::<Vec<&str>>();
+
+        Ok(Self(parts[0], parts[1], false))
+    }
+}
 impl<'a> Eq for Asset<'a> {}
 impl<'a> PartialEq for Asset<'a> {
     fn eq(&self, other: &Self) -> bool {
@@ -147,25 +151,5 @@ mod tests {
         let asset = Asset::from_str(asset_str);
 
         assert_eq!(asset_str, asset.as_str());
-    }
-
-    #[test]
-    fn test_asset_as_querystring() {
-        let native = Asset::native();
-        let qs = native.as_querystring(String::from("base"));
-
-        assert_eq!("&base_asset_type=native", qs);
-
-        let y_usdc = Asset::new(
-            "yUSDC",
-            "GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
-        );
-
-        let qs = y_usdc.as_querystring(String::from("counter"));
-
-        assert_eq!(
-            "&counter_asset_type=credit_alphanum12&counter_asset_code=yUSDC&counter_asset_issuer=GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
-             qs
-        );
     }
 }

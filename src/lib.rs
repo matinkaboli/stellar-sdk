@@ -5,13 +5,6 @@
 //! ## Usage:
 //!
 //! ```
-//! use stellar_sdk::{
-//!     types::Asset,
-//!     utils::{Direction, Endpoint},
-//!     CallBuilder, Server,
-//! };
-//!
-//! fn main() {
 //!     let s = String::from("https://horizon.stellar.org");
 //!     let s = Server::new(s);
 //!
@@ -56,7 +49,6 @@
 //!     println!("{:#?}", xlm_trades);
 //!     println!("{:#?}", my_acc);
 //!     println!("{:#?}", usdc_liquidity_pools);
-//! }
 //! ```
 
 mod api_call;
