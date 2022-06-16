@@ -21,7 +21,7 @@ pub fn api_call<T: DeserializeOwned>(
 
     match req.call() {
         Ok(res) => {
-            let res_str = Box::new(res.into_string()?);
+            let res_str = res.into_string()?;
             return Ok(serde_json::from_str::<T>(&res_str)?);
         }
         Err(e) => match e {
