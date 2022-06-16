@@ -13,7 +13,7 @@ pub struct HorizonError {
 }
 
 impl Display for HorizonError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
         std::fmt::Result::Ok(())
     }
 }

@@ -1,29 +1,27 @@
 use anyhow::{self, bail};
-use serde::Deserialize;
+use serde::de::DeserializeOwned;
 use std::collections::HashMap;
 use ureq::{self, Error as UreqError};
 
 use crate::types::{HorizonError, HttpMethod};
 
-pub fn api_call<'a, T: Deserialize<'a>>(
+pub fn api_call<T: DeserializeOwned>(
     url: String,
     method: HttpMethod,
     query_params: &HashMap<String, String>,
 ) -> Result<T, anyhow::Error> {
-    let req: ureq::Request;
-
-    match method {
-        HttpMethod::GET => req = ureq::get(&url),
-        HttpMethod::POST => req = ureq::post(&url),
+    let mut req = match method {
+        HttpMethod::GET => ureq::get(&url),
+        HttpMethod::POST => ureq::post(&url),
     };
 
     for query_param in query_params.iter() {
-        req.query(query_param.0, query_param.1);
+        req = req.query(query_param.0, query_param.1);
     }
 
     match req.call() {
         Ok(res) => {
-            let res_str = res.into_string()?;
+            let res_str = Box::new(res.into_string()?);
             return Ok(serde_json::from_str::<T>(&res_str)?);
         }
         Err(e) => match e {
