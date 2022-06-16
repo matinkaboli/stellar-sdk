@@ -67,9 +67,7 @@ impl<'a> FromStr for Asset<'a> {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, ()> {
-        let e = Box::new(s);
-
-        let parts = *e.split(':').collect::<Vec<&str>>();
+        let parts = s.split(':').collect::<Vec<&str>>();
 
         Ok(Self(parts[0], parts[1], false))
     }
