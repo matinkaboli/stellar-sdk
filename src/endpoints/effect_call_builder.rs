@@ -1,41 +1,45 @@
+use std::collections::HashMap;
+
+use crate::api_call::api_call;
 use crate::endpoints::{horizon::Record, CallBuilder, Server};
 use crate::types::Effect;
-use crate::utils::{req, Direction, Endpoint};
+use crate::utils::{Direction, Endpoint};
 
 #[derive(Debug)]
 pub struct EffectCallBuilder<'a> {
-    pub server: &'a Server,
-    pub cursor: Option<String>,
-    pub order: Option<Direction>,
-    pub limit: Option<u8>,
-    pub endpoint: Endpoint,
+    server_url: &'a str,
+    endpoint: Endpoint,
+    query_params: HashMap<String, String>,
 }
 
-impl<'a> CallBuilder<'a, Effect> for EffectCallBuilder<'a> {
-    fn new(s: &'a Server) -> Self {
+impl<'a> EffectCallBuilder<'a> {
+    pub fn new(s: &'a Server) -> Self {
         Self {
-            server: s,
-            cursor: None,
-            order: None,
-            limit: None,
+            server_url: &s.0,
             endpoint: Endpoint::None,
+            query_params: HashMap::new(),
         }
     }
+}
 
+impl<'a> CallBuilder<Effect> for EffectCallBuilder<'a> {
     fn cursor(&mut self, cursor: &str) -> &mut Self {
-        self.cursor = Some(String::from(cursor));
+        self.query_params
+            .insert(String::from("cursor"), String::from(cursor));
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.order = Some(dir);
+        self.query_params
+            .insert(String::from("order"), String::from(dir.as_str()));
 
         self
     }
 
-    fn limit(&mut self, limit_number: u8) -> &mut Self {
-        self.limit = Some(limit_number);
+    fn limit(&mut self, limit: u8) -> &mut Self {
+        self.query_params
+            .insert(String::from("limit"), limit.to_string());
 
         self
     }
@@ -46,31 +50,15 @@ impl<'a> CallBuilder<'a, Effect> for EffectCallBuilder<'a> {
         self
     }
 
-    fn call(&self) -> Result<Record<Effect>, &str> {
-        let mut url = format!(
+    fn call(&self) -> Result<Record<Effect>, anyhow::Error> {
+        let url = format!(
             "{}{}{}",
-            &self.server.0,
+            &self.server_url,
             self.endpoint.as_str(),
-            "/effects?",
+            "/effects",
         );
 
-        if let Some(x) = &self.cursor {
-            url.push_str(&format!("&cursor={}", x));
-        }
-
-        if let Some(x) = &self.order {
-            url.push_str(&format!("&order={}", x.as_str()));
-        }
-
-        if let Some(x) = &self.limit {
-            url.push_str(&format!("&limit={}", x));
-        }
-
-        let resp = req(&url).unwrap();
-
-        let p: Record<Effect> = serde_json::from_str(&resp).unwrap();
-
-        Ok(p)
+        api_call::<Record<Effect>>(url, crate::types::HttpMethod::GET, &self.query_params)
     }
 }
 

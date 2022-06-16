@@ -1,75 +1,73 @@
+use std::collections::HashMap;
+
+use crate::api_call::api_call;
 use crate::endpoints::{horizon::Record, CallBuilder, Server};
 use crate::types::{Asset, Offer};
-use crate::utils::{req, Direction, Endpoint};
+use crate::utils::{Direction, Endpoint};
 
 #[derive(Debug)]
 pub struct OfferCallBuilder<'a> {
-    pub server: &'a Server,
-    pub cursor: Option<String>,
-    pub order: Option<Direction>,
-    pub limit: Option<u8>,
-    pub buying: Option<&'a Asset<'a>>,
-    pub seller: Option<String>,
-    pub selling: Option<&'a Asset<'a>>,
-    pub sponsor: Option<String>,
-    pub endpoint: Endpoint,
+    server_url: &'a str,
+    endpoint: Endpoint,
+    query_params: HashMap<String, String>,
 }
 
 impl<'a> OfferCallBuilder<'a> {
-    pub fn selling(&mut self, asset: &'a Asset) -> &mut Self {
-        self.selling = Some(asset);
+    pub fn new(s: &'a Server) -> Self {
+        OfferCallBuilder {
+            server_url: &s.0,
+            endpoint: Endpoint::None,
+            query_params: HashMap::new(),
+        }
+    }
+
+    pub fn selling(&mut self, asset: &Asset) -> &mut Self {
+        self.query_params
+            .insert(String::from("selling"), asset.as_str());
 
         self
     }
 
-    pub fn buying(&mut self, asset: &'a Asset) -> &mut Self {
-        self.buying = Some(asset);
+    pub fn buying(&mut self, asset: &Asset) -> &mut Self {
+        self.query_params
+            .insert(String::from("buying"), asset.as_str());
 
         self
     }
 
     pub fn seller(&mut self, seller: &str) -> &mut Self {
-        self.seller = Some(String::from(seller));
+        self.query_params
+            .insert(String::from("seller"), String::from(seller));
 
         self
     }
 
     pub fn sponsor(&mut self, sponsor: &str) -> &mut Self {
-        self.sponsor = Some(String::from(sponsor));
+        self.query_params
+            .insert(String::from("sponsor"), String::from(sponsor));
 
         self
     }
 }
 
-impl<'a> CallBuilder<'a, Offer> for OfferCallBuilder<'a> {
-    fn new(s: &'a Server) -> Self {
-        OfferCallBuilder {
-            server: s,
-            cursor: None,
-            order: None,
-            limit: None,
-            sponsor: None,
-            buying: None,
-            seller: None,
-            selling: None,
-            endpoint: Endpoint::None,
-        }
-    }
-
+impl<'a> CallBuilder<Offer> for OfferCallBuilder<'a> {
     fn cursor(&mut self, cursor: &str) -> &mut Self {
-        self.cursor = Some(String::from(cursor));
+        self.query_params
+            .insert(String::from("cursor"), String::from(cursor));
 
         self
     }
 
-    fn order(&mut self, o: Direction) -> &mut Self {
-        self.order = Some(o);
+    fn order(&mut self, dir: Direction) -> &mut Self {
+        self.query_params
+            .insert(String::from("order"), String::from(dir.as_str()));
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.limit = Some(limit);
+        self.query_params
+            .insert(String::from("limit"), limit.to_string());
 
         self
     }
@@ -80,42 +78,15 @@ impl<'a> CallBuilder<'a, Offer> for OfferCallBuilder<'a> {
         self
     }
 
-    fn call(&self) -> Result<Record<Offer>, &str> {
-        let mut url = format!("{}{}{}", &self.server.0, self.endpoint.as_str(), "/offers?");
+    fn call(&self) -> Result<Record<Offer>, anyhow::Error> {
+        let url = format!(
+            "{}{}{}",
+            &self.server_url,
+            self.endpoint.as_str(),
+            "/offers"
+        );
 
-        if let Some(x) = &self.cursor {
-            url.push_str(&format!("&cursor={}", x));
-        }
-
-        if let Some(x) = &self.order {
-            url.push_str(&format!("&order={}", x.as_str()));
-        }
-
-        if let Some(x) = &self.limit {
-            url.push_str(&format!("&limit={}", x));
-        }
-
-        if let Some(x) = &self.sponsor {
-            url.push_str(&format!("&sponsor={}", x));
-        }
-
-        if let Some(x) = &self.seller {
-            url.push_str(&format!("&seller={}", x));
-        }
-
-        if let Some(x) = &self.selling {
-            url.push_str(&format!("&selling={}", x.as_str()));
-        }
-
-        if let Some(x) = &self.buying {
-            url.push_str(&format!("&buying={}", x.as_str()));
-        }
-
-        let resp = req(&url).unwrap();
-
-        let p: Record<Offer> = serde_json::from_str(&resp).unwrap();
-
-        Ok(p)
+        api_call::<Record<Offer>>(url, crate::types::HttpMethod::GET, &self.query_params)
     }
 }
 

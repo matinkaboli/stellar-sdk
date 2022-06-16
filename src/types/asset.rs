@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Debug)]
 pub struct Asset<'a>(pub &'a str, pub &'a str, pub bool);
 
@@ -37,6 +39,7 @@ impl<'a> Asset<'a> {
         Self(vec[0], vec[1], false)
     }
 
+    #[deprecated]
     pub fn as_querystring(&self, name: String) -> String {
         if self.get_type() == "native" {
             return format!("&{}_asset_type={}", name, "native");
@@ -51,6 +54,19 @@ impl<'a> Asset<'a> {
             name,
             self.1,
         )
+    }
+
+    pub fn as_querystring_v2(&self, name: String) -> HashMap<String, String> {
+        let mut query_string = HashMap::<String, String>::new();
+        if self.get_type() == "native" {
+            query_string.insert(format!("&{}_asset_type", name), String::from("native"));
+            return query_string;
+        }
+
+        query_string.insert(format!("&{}_asset_type", name), self.get_type());
+        query_string.insert(format!("&{}_asset_code", name), String::from(self.0));
+        query_string.insert(format!("&{}_asset_issuer", name), String::from(self.1));
+        query_string
     }
 }
 

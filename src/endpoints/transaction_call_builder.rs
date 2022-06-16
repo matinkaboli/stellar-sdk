@@ -1,43 +1,52 @@
+use std::collections::HashMap;
+
+use crate::api_call::api_call;
 use crate::endpoints::{horizon::Record, CallBuilder, Server};
 use crate::types::Transaction;
-use crate::utils::{req, Direction, Endpoint};
+use crate::utils::{Direction, Endpoint};
 
 #[derive(Debug)]
 pub struct TransactionCallBuilder<'a> {
-    pub server: &'a Server,
-    pub cursor: Option<String>,
-    pub order: Option<Direction>,
-    pub limit: Option<u8>,
-    pub include_failed: bool,
-    pub endpoint: Endpoint,
+    server_url: &'a str,
+    endpoint: Endpoint,
+    query_params: HashMap<String, String>,
 }
 
-impl<'a> CallBuilder<'a, Transaction> for TransactionCallBuilder<'a> {
-    fn new(s: &'a Server) -> Self {
+impl<'a> TransactionCallBuilder<'a> {
+    pub fn new(s: &'a Server) -> Self {
         Self {
-            server: s,
-            cursor: None,
-            order: None,
-            limit: None,
-            include_failed: false,
+            server_url: &s.0,
             endpoint: Endpoint::None,
+            query_params: HashMap::new(),
         }
     }
 
+    pub fn include_failed(&mut self, i: bool) -> &mut Self {
+        self.query_params
+            .insert(String::from("include_failed"), i.to_string());
+
+        self
+    }
+}
+
+impl<'a> CallBuilder<Transaction> for TransactionCallBuilder<'a> {
     fn cursor(&mut self, cursor: &str) -> &mut Self {
-        self.cursor = Some(String::from(cursor));
+        self.query_params
+            .insert(String::from("cursor"), String::from(cursor));
 
         self
     }
 
     fn order(&mut self, dir: Direction) -> &mut Self {
-        self.order = Some(dir);
+        self.query_params
+            .insert(String::from("order"), String::from(dir.as_str()));
 
         self
     }
 
     fn limit(&mut self, limit: u8) -> &mut Self {
-        self.limit = Some(limit);
+        self.query_params
+            .insert(String::from("limit"), limit.to_string());
 
         self
     }
@@ -48,40 +57,15 @@ impl<'a> CallBuilder<'a, Transaction> for TransactionCallBuilder<'a> {
         self
     }
 
-    fn call(&self) -> Result<Record<Transaction>, &str> {
-        let mut url = format!(
-            "{}{}{}&include_failed={}",
-            &self.server.0,
+    fn call(&self) -> Result<Record<Transaction>, anyhow::Error> {
+        let url = format!(
+            "{}{}{}",
+            &self.server_url,
             self.endpoint.as_str(),
-            "/transactions?",
-            self.include_failed,
+            "/transactions",
         );
 
-        if let Some(x) = &self.cursor {
-            url.push_str(&format!("&cursor={}", x));
-        }
-
-        if let Some(x) = &self.order {
-            url.push_str(&format!("&order={}", x.as_str()));
-        }
-
-        if let Some(x) = &self.limit {
-            url.push_str(&format!("&limit={}", x));
-        }
-
-        let resp = req(&url).unwrap();
-
-        let p: Record<Transaction> = serde_json::from_str(&resp).unwrap();
-
-        Ok(p)
-    }
-}
-
-impl<'a> TransactionCallBuilder<'a> {
-    pub fn include_failed(&mut self, i: bool) -> &mut Self {
-        self.include_failed = i;
-
-        self
+        api_call::<Record<Transaction>>(url, crate::types::HttpMethod::GET, &self.query_params)
     }
 }
 
