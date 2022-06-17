@@ -56,6 +56,7 @@
 
 mod api_call;
 mod endpoints;
+mod str_key;
 pub mod types;
 pub mod utils;
 

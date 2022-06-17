@@ -4,11 +4,11 @@ pub enum Direction {
     Desc,
 }
 
-impl Direction {
-    pub fn as_str(&self) -> &'static str {
+impl ToString for Direction {
+    fn to_string(&self) -> String {
         match self {
-            Direction::Asc => "asc",
-            Direction::Desc => "desc",
+            Direction::Asc => String::from("asc"),
+            Direction::Desc => String::from("desc"),
         }
     }
 }

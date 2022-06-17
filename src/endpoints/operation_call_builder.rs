@@ -39,7 +39,7 @@ impl<'a> CallBuilder<Operation> for OperationCallBuilder<'a> {
 
     fn order(&mut self, dir: Direction) -> &mut Self {
         self.query_params
-            .insert(String::from("order"), String::from(dir.as_str()));
+            .insert(String::from("order"), dir.to_string());
 
         self
     }
