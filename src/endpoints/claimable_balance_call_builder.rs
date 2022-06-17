@@ -110,8 +110,8 @@ mod tests {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
         let lsp = Asset::new(
-            "LSP",
-            "GAB7STHVD5BDH3EEYXPI3OM7PCS4V443PYB5FNT6CFGJVPDLMKDM24WK",
+            String::from("LSP"),
+            String::from("GAB7STHVD5BDH3EEYXPI3OM7PCS4V443PYB5FNT6CFGJVPDLMKDM24WK"),
         );
 
         let cbcb = ClaimableBalanceCallbuilder::new(&s)

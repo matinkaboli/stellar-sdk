@@ -53,13 +53,13 @@ impl Asset {
         let mut query_string = HashMap::<String, String>::new();
 
         if self.get_type() == "native" {
-            query_string.insert(format!("&{}_asset_type", name), String::from("native"));
+            query_string.insert(format!("{}_asset_type", name), String::from("native"));
             return query_string;
         }
 
-        query_string.insert(format!("&{}_asset_type", name), self.get_type());
-        query_string.insert(format!("&{}_asset_code", name), self.0.clone());
-        query_string.insert(format!("&{}_asset_issuer", name), self.1.clone());
+        query_string.insert(format!("{}_asset_type", name), self.get_type());
+        query_string.insert(format!("{}_asset_code", name), self.0.clone());
+        query_string.insert(format!("{}_asset_issuer", name), self.1.clone());
         query_string
     }
 }
@@ -148,8 +148,8 @@ mod tests {
     fn test_asset_from_str() {
         let asset_str = "VELO:GDM4RQUQQUVSKQA7S6EM7XBZP3FCGH4Q7CL6TABQ7B2BEJ5ERARM2M5M";
 
-        let asset = Asset::from_str(asset_str);
+        let asset = Asset::from_str(asset_str).unwrap();
 
-        assert_eq!(asset_str, asset.as_str());
+        assert_eq!(String::from(asset_str), asset.as_str());
     }
 }

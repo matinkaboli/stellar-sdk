@@ -60,14 +60,14 @@ mod tests {
 
         let native = Asset::native();
         let bat = Asset::new(
-            "BAT",
-            "GBDEVU63Y6NTHJQQZIKVTC23NWLQVP3WJ2RI2OTSJTNYOIGICST6DUXR",
+            String::from("BAT"),
+            String::from("GBDEVU63Y6NTHJQQZIKVTC23NWLQVP3WJ2RI2OTSJTNYOIGICST6DUXR"),
         );
 
-        let mut ocb = OrderBookCallBuilder::new(&s, &native, &bat);
+        let mut ocb = OrderBookCallBuilder::new(&s, native, bat);
 
-        let op_records = ocb.limit(5).call().unwrap();
+        let op_records = ocb.limit(1).call().unwrap();
 
-        assert_eq!(5, op_records.bids.len());
+        assert_eq!(1, op_records.bids.len());
     }
 }

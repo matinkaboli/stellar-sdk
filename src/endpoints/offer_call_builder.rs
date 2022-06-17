@@ -110,8 +110,8 @@ mod tests {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
         let y_xlm = Asset::new(
-            "yXLM",
-            "GARDNV3Q7YGT4AKSDF25LT32YSCCW4EV22Y2TV3I2PU2MMXJTEDL5T55",
+            String::from("yXLM"),
+            String::from("GARDNV3Q7YGT4AKSDF25LT32YSCCW4EV22Y2TV3I2PU2MMXJTEDL5T55"),
         );
         let xlm = Asset::native();
 

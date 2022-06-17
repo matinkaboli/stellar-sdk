@@ -60,6 +60,7 @@ impl<'a> StrictSendCallBuilder<'a> {
             StrictPathSource::Account(account) => new_self
                 .query_params
                 .insert(String::from("destination_account"), String::from(account)),
+
             StrictPathSource::Assets(assets) => new_self.query_params.insert(
                 String::from("destination_assets"),
                 assets
@@ -72,7 +73,7 @@ impl<'a> StrictSendCallBuilder<'a> {
 
         new_self
             .query_params
-            .extend(source_asset.as_querystring_hashmap("source_asset".to_string()));
+            .extend(source_asset.as_querystring_hashmap(String::from("source")));
 
         new_self
             .query_params
@@ -91,21 +92,12 @@ mod tests {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
         let native = Asset::native();
-        let _bat = Asset::new(
-            "BAT",
-            "GBDEVU63Y6NTHJQQZIKVTC23NWLQVP3WJ2RI2OTSJTNYOIGICST6DUXR",
-        );
+        let rbt_issuer = String::from("GBDEVU63Y6NTHJQQZIKVTC23NWLQVP3WJ2RI2OTSJTNYOIGICST6DUXR");
 
-        let _ocb = StrictSendCallBuilder::new(
-            &s,
-            &StrictPathSource::Account(String::from(
-                "GBDEVU63Y6NTHJQQZIKVTC23NWLQVP3WJ2RI2OTSJTNYOIGICST6DUXR",
-            )),
-            &native,
-            "20",
-        )
-        .limit(1)
-        .call()
-        .unwrap();
+        let _ocb =
+            StrictSendCallBuilder::new(&s, &StrictPathSource::Account(rbt_issuer), &native, "20")
+                .limit(1)
+                .call()
+                .unwrap();
     }
 }

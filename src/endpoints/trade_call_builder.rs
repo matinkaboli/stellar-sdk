@@ -105,8 +105,8 @@ mod tests {
 
         let native = Asset::native();
         let y_usdc = Asset::new(
-            "yUSDC",
-            "GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
+            String::from("yUSDC"),
+            String::from("GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF"),
         );
         let mut tcb = TradeCallBuilder::new(&s);
 

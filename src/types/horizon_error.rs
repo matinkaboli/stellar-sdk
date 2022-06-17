@@ -22,8 +22,8 @@ impl Error for HorizonError {}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ExtraHorizonError {
-    envelope_xdr: String,
-    result_codes: ErrorResultCode,
+    envelope_xdr: Option<String>,
+    result_codes: Option<ErrorResultCode>,
     result_xdr: String,
 }
 

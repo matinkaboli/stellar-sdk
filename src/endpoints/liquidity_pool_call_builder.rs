@@ -97,12 +97,12 @@ mod tests {
         let y_xlm_str = "yXLM:GARDNV3Q7YGT4AKSDF25LT32YSCCW4EV22Y2TV3I2PU2MMXJTEDL5T55";
 
         let y_xlm = Asset::new(
-            "yXLM",
-            "GARDNV3Q7YGT4AKSDF25LT32YSCCW4EV22Y2TV3I2PU2MMXJTEDL5T55",
+            String::from("yXLM"),
+            String::from("GARDNV3Q7YGT4AKSDF25LT32YSCCW4EV22Y2TV3I2PU2MMXJTEDL5T55"),
         );
         let y_usdc = Asset::new(
-            "yUSDC",
-            "GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF",
+            String::from("yUSDC"),
+            String::from("GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF"),
         );
 
         let mut lpcb = LiquidityPoolCallBuilder::new(&s);
