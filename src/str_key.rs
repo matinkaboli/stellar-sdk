@@ -1,7 +1,6 @@
 use byteorder::{ByteOrder, LittleEndian};
 use crc::{Crc, CRC_16_XMODEM};
 use data_encoding::BASE32;
-use std::{fmt::format, str::Bytes};
 
 pub enum VersionBytes {
     Ed25519PublicKey,
