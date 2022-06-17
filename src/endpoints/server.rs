@@ -98,18 +98,14 @@ impl Server {
         TradeAggregationCallBuilder::new(self, base, counter, resolution)
     }
 
-    pub fn order_books<'a>(
-        &'a self,
-        selling: &'a Asset<'a>,
-        buying: &'a Asset<'a>,
-    ) -> OrderBookCallBuilder<'a> {
+    pub fn order_books(&self, selling: Asset, buying: Asset) -> OrderBookCallBuilder {
         OrderBookCallBuilder::new(self, selling, buying)
     }
 
     pub fn strict_receive_paths<'a>(
         &'a self,
-        source: &StrictPathSource<'a>,
-        destination_asset: Asset<'a>,
+        source: &StrictPathSource,
+        destination_asset: Asset,
         destination_amount: String,
     ) -> StrictReceiveCallBuilder {
         StrictReceiveCallBuilder::new(self, source, &destination_asset, &destination_amount)
@@ -117,15 +113,15 @@ impl Server {
 
     pub fn strict_send_paths<'a>(
         &'a self,
-        destination: &StrictPathSource<'a>,
-        source_asset: &'a Asset<'a>,
+        destination: &StrictPathSource,
+        source_asset: &'a Asset,
         source_amount: &'a str,
     ) -> StrictSendCallBuilder {
         StrictSendCallBuilder::new(self, destination, source_asset, source_amount)
     }
 
     pub fn trades(&self) -> TradeCallBuilder {
-        TradeCallBuilder::new(&self)
+        TradeCallBuilder::new(self)
     }
 
     pub fn payments(&self) -> PaymentCallBuilder {

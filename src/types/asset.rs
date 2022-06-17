@@ -1,15 +1,15 @@
 use std::{collections::HashMap, str::FromStr};
 
 #[derive(Debug)]
-pub struct Asset<'a>(pub &'a str, pub &'a str, pub bool);
+pub struct Asset(pub String, pub String, pub bool);
 
-impl<'a> Asset<'a> {
-    pub fn new(code: &'a str, issuer: &'a str) -> Self {
+impl Asset {
+    pub fn new(code: String, issuer: String) -> Self {
         Asset(code, issuer, false)
     }
 
     pub fn native() -> Self {
-        Asset("XLM", "", true)
+        Asset(String::from("XLM"), String::from(""), true)
     }
 
     pub fn as_str(&self) -> String {
@@ -51,29 +51,31 @@ impl<'a> Asset<'a> {
 
     pub fn as_querystring_hashmap(&self, name: String) -> HashMap<String, String> {
         let mut query_string = HashMap::<String, String>::new();
+
         if self.get_type() == "native" {
             query_string.insert(format!("&{}_asset_type", name), String::from("native"));
             return query_string;
         }
 
         query_string.insert(format!("&{}_asset_type", name), self.get_type());
-        query_string.insert(format!("&{}_asset_code", name), String::from(self.0));
-        query_string.insert(format!("&{}_asset_issuer", name), String::from(self.1));
+        query_string.insert(format!("&{}_asset_code", name), self.0.clone());
+        query_string.insert(format!("&{}_asset_issuer", name), self.1.clone());
         query_string
     }
 }
 
-impl<'a> FromStr for Asset<'a> {
+impl FromStr for Asset {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, ()> {
-        let parts = s.split(':').collect::<Vec<&str>>();
+        let a = String::from(s);
+        let parts = a.split(':').collect::<Vec<&str>>();
 
-        Ok(Self(parts[0], parts[1], false))
+        Ok(Self(String::from(parts[0]), String::from(parts[1]), false))
     }
 }
-impl<'a> Eq for Asset<'a> {}
-impl<'a> PartialEq for Asset<'a> {
+impl Eq for Asset {}
+impl PartialEq for Asset {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0 && self.1 == other.1 && self.2 == other.2
     }
@@ -86,8 +88,8 @@ mod tests {
     #[test]
     fn test_asset_as_str() {
         let usdc = Asset::new(
-            "USDC",
-            "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+            String::from("USDC"),
+            String::from("GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"),
         );
 
         let asset_in_str =
@@ -99,8 +101,8 @@ mod tests {
     #[test]
     fn test_is_native() {
         let usdc = Asset::new(
-            "USDC",
-            "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+            String::from("USDC"),
+            String::from("GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"),
         );
 
         let xlm = Asset::native();
@@ -111,13 +113,13 @@ mod tests {
     #[test]
     fn test_assets_equal() {
         let usdc = Asset::new(
-            "USDC",
-            "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+            String::from("USDC"),
+            String::from("GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"),
         );
 
         let aqua = Asset::new(
-            "AQUA",
-            "GBNZILSTVQZ4R7IKQDGHYGY2QXL5QOFJYQMXPKWRRM5PAV7Y4M67AQUA",
+            String::from("AQUA"),
+            String::from("GBNZILSTVQZ4R7IKQDGHYGY2QXL5QOFJYQMXPKWRRM5PAV7Y4M67AQUA"),
         );
 
         assert!(usdc != aqua);
@@ -126,13 +128,13 @@ mod tests {
     #[test]
     fn test_assets_type() {
         let rbt = Asset::new(
-            "RBT",
-            "GBSQR5CTKWYQXDGB2KHPB4IZL2FO4KVOWH72WEUSZII7Q32HGGIPSOYS",
+            String::from("RBT"),
+            String::from("GBSQR5CTKWYQXDGB2KHPB4IZL2FO4KVOWH72WEUSZII7Q32HGGIPSOYS"),
         );
 
         let doget = Asset::new(
-            "DOGET",
-            "GDOEVDDBU6OBWKL7VHDAOKD77UP4DKHQYKOKJJT5PR3WRDBTX35HUEUX",
+            String::from("DOGET"),
+            String::from("GDOEVDDBU6OBWKL7VHDAOKD77UP4DKHQYKOKJJT5PR3WRDBTX35HUEUX"),
         );
 
         let xlm = Asset::native();

@@ -13,7 +13,7 @@ pub struct OrderBookCallBuilder<'a> {
 }
 
 impl<'a> OrderBookCallBuilder<'a> {
-    pub fn new(s: &'a Server, selling: &'a Asset<'a>, buying: &'a Asset<'a>) -> Self {
+    pub fn new(s: &'a Server, selling: Asset, buying: Asset) -> Self {
         let mut new_self = Self {
             server_url: &s.0,
             endpoint: Endpoint::None,
