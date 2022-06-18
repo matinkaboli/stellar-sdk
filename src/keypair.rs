@@ -1,5 +1,8 @@
 use anyhow::bail;
-use nacl::sign::generate_keypair;
+use nacl::sign::{generate_keypair, signature};
+use str_key::{decode_check, encode_check, VersionBytes};
+
+use crate::str_key;
 
 #[derive(Debug)]
 struct Keypair {
@@ -39,28 +42,78 @@ impl Keypair {
             secret_seed: None,
         })
     }
-    // pub fn from_public_key(public_key: &str) -> Result<Self, anyhow::Error> {
-    //     let decoded = str_key::decode_check(&VersionBytes::Ed25519PublicKey, public_key);
-    //
-    //     if let Err(_) = decoded {
-    //         bail!("Invalid Stellar public key")
-    //     }
-    //
-    //     let pk = decoded.unwrap();
-    //
-    //     if pk.len() != 32 {
-    //         bail!("Invalid Stellar public key")
-    //     }
-    //
-    //     Ok(Self {
-    //         public_key: pk.unwrap(),
-    //         secret_key: None,
-    //     })
-    // }
-    //
-    pub fn from_raw_ed25519_seed(seed: &Vec<u8>) -> Result<Keypair, anyhow::Error> {
+    pub fn from_secret_key(secret: &str) -> Result<Self, anyhow::Error> {
+        let raw_secret = decode_check(&VersionBytes::Ed25519SecretSeed, secret)?;
+
+        Keypair::from_raw_ed25519_seed(&raw_secret)
+    }
+    pub fn from_public_key(public_key: &str) -> Result<Self, anyhow::Error> {
+        let decoded = decode_check(&VersionBytes::Ed25519PublicKey, public_key);
+
+        if decoded.is_err() {
+            bail!("Invalid Stellar public key")
+        }
+
+        let pk = decoded.unwrap();
+
+        if pk.len() != 32 {
+            bail!("Invalid Stellar public key")
+        }
+
+        Ok(Self {
+            public_key: pk,
+            secret_seed: None,
+            secret_key: None,
+        })
+    }
+    pub fn from_raw_ed25519_seed(seed: &[u8]) -> Result<Self, anyhow::Error> {
         Self::new_from_secret_key(seed.to_vec())
     }
+    pub fn raw_secret_key(&self) -> Option<Vec<u8>> {
+        self.secret_seed.clone()
+    }
+    pub fn raw_public_key(&self) -> &Vec<u8> {
+        &self.public_key
+    }
+    pub fn secret_key(&mut self) -> Result<String, anyhow::Error> {
+        match &mut self.secret_seed {
+            None => bail!("no secret_key available"),
+            Some(s) => Ok(encode_check(&str_key::VersionBytes::Ed25519SecretSeed, s)),
+        }
+    }
+    pub fn public_key(&mut self) -> String {
+        encode_check(
+            &str_key::VersionBytes::Ed25519PublicKey,
+            &mut self.public_key,
+        )
+    }
+    pub fn can_sign(&self) -> bool {
+        self.secret_key.is_some()
+    }
+    pub fn sign(&self, data: Vec<u8>) -> Result<Vec<u8>, anyhow::Error> {
+        if !self.can_sign() {
+            bail!("cannot sign, no secret_key available")
+        }
+
+        if let Some(s) = &self.secret_key {
+            match signature(&data, s) {
+                Err(_) => bail!("error while signing"),
+                Ok(m) => return Ok(m),
+            }
+        }
+
+        bail!("error while signing")
+    }
+    // fn master
+    // fn random
+    // fn xdr_account_id
+    // fn xdr_public_key
+    // fn xdr_muxed_account
+    // fn signature_hint
+    // fn sign_payload_decorated
+    // fn sign_decorated
+    // fn verify
+    // fn sign
 }
 
 #[cfg(test)]
@@ -69,13 +122,51 @@ mod tests {
     use crate::str_key;
 
     #[test]
-    fn test_import_from_secret_key() {
-        let seed = "SAZ443I6BNR2MD3G27C4EZIEEFMKOPT4SR6IHZDLXPODEHR2GRQVIC7R";
-        let seed_bytes =
-            str_key::decode_check(&str_key::VersionBytes::Ed25519SecretSeed, seed).unwrap();
+    fn test_from_secret_key() {
+        let seed = String::from("SAZ443I6BNR2MD3G27C4EZIEEFMKOPT4SR6IHZDLXPODEHR2GRQVIC7R");
+        let pk = String::from("GACAMF2WHKKQTYVHVA3CRMVUHN6GUBLTB7PBJQF73N7ATCIYAIFUCT6B");
 
-        let keypair = Keypair::from_raw_ed25519_seed(&seed_bytes);
+        let mut keypair = Keypair::from_secret_key(&seed).unwrap();
+        let seed_from_keypair = keypair.secret_key().unwrap();
 
-        println!("{:?}", keypair);
+        assert_eq!(pk, keypair.public_key());
+        assert_eq!(seed, seed_from_keypair);
+    }
+
+    #[test]
+    fn test_can_sign() {
+        let pk = String::from("GACAMF2WHKKQTYVHVA3CRMVUHN6GUBLTB7PBJQF73N7ATCIYAIFUCT6B");
+        let keypair = Keypair::from_public_key(&pk).unwrap();
+        assert!(!keypair.can_sign());
+
+        let seed = String::from("SAZ443I6BNR2MD3G27C4EZIEEFMKOPT4SR6IHZDLXPODEHR2GRQVIC7R");
+        let keypair = Keypair::from_secret_key(&seed).unwrap();
+        assert!(keypair.can_sign());
+    }
+
+    #[test]
+    fn test_from_raw_seed() {
+        let seed = String::from("SAZ443I6BNR2MD3G27C4EZIEEFMKOPT4SR6IHZDLXPODEHR2GRQVIC7R");
+        let raw_seed = decode_check(&VersionBytes::Ed25519SecretSeed, &seed).unwrap();
+
+        let keypair = Keypair::from_raw_ed25519_seed(&raw_seed).unwrap();
+
+        if let Some(x) = keypair.raw_secret_key() {
+            assert_eq!(raw_seed, x);
+        }
+    }
+
+    #[test]
+    fn test_sign_message() {
+        let message = "Hello World";
+        let message = message.as_bytes().to_vec();
+
+        let seed = String::from("SAZ443I6BNR2MD3G27C4EZIEEFMKOPT4SR6IHZDLXPODEHR2GRQVIC7R");
+        let keypair = Keypair::from_secret_key(&seed).unwrap();
+
+        let signed_message = keypair.sign(message).unwrap();
+        let signed_message = String::from_utf8(signed_message).unwrap();
+
+        println!("{}", signed_message);
     }
 }

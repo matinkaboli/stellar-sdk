@@ -64,8 +64,7 @@ fn calculate_checksum(bytes: &[u8]) -> Vec<u8> {
 }
 
 pub fn encode_check(v: &VersionBytes, data: &mut Vec<u8>) -> String {
-    let mut bytes: Vec<u8> = Vec::new();
-    bytes.push(v.clone().into());
+    let mut bytes: Vec<u8> = vec![v.clone().into()];
     bytes.append(data);
     let mut checksum = calculate_checksum(&bytes);
     bytes.append(&mut checksum);
