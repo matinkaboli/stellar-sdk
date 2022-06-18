@@ -3,7 +3,7 @@ use byteorder::{ByteOrder, LittleEndian};
 use crc::{Crc, CRC_16_XMODEM};
 use data_encoding::BASE32;
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone)]
 pub enum VersionBytes {
     Ed25519PublicKey,  // G
     Ed25519SecretSeed, // S
@@ -63,9 +63,9 @@ fn calculate_checksum(bytes: &[u8]) -> Vec<u8> {
     unencoded
 }
 
-fn encode_check(v: VersionBytes, data: &mut Vec<u8>) -> String {
+pub fn encode_check(v: &VersionBytes, data: &mut Vec<u8>) -> String {
     let mut bytes: Vec<u8> = Vec::new();
-    bytes.push(v.into());
+    bytes.push(v.clone().into());
     bytes.append(data);
     let mut checksum = calculate_checksum(&bytes);
     bytes.append(&mut checksum);
@@ -73,7 +73,7 @@ fn encode_check(v: VersionBytes, data: &mut Vec<u8>) -> String {
     BASE32.encode(&bytes)
 }
 
-fn decode_check(v: VersionBytes, encoded_data: &str) -> Result<Vec<u8>, anyhow::Error> {
+pub fn decode_check(v: &VersionBytes, encoded_data: &str) -> Result<Vec<u8>, anyhow::Error> {
     let decoded = BASE32.decode(encoded_data.as_bytes())?;
     let version_byte: VersionBytes = VersionBytes::try_from(decoded[0])?;
     let payload = &decoded[..decoded.len() - 2];
@@ -84,18 +84,53 @@ fn decode_check(v: VersionBytes, encoded_data: &str) -> Result<Vec<u8>, anyhow::
         bail!("invalid encode string")
     }
 
-    if version_byte != v {
+    if &version_byte != v {
         bail!("invalid version byte")
     }
 
     let expected_checksum = calculate_checksum(payload);
-    println!("{:#?}", expected_checksum);
-    println!("{:#?}", checksum);
     if expected_checksum != checksum {
         bail!("invalid checksum")
     }
 
     Ok(data.to_vec())
+}
+
+pub fn is_valid(v: &VersionBytes, encoded: &str) -> bool {
+    match v {
+        VersionBytes::Ed25519PublicKey
+        | VersionBytes::Ed25519SecretSeed
+        | VersionBytes::PreAuthTx
+        | VersionBytes::Sha256Hash => {
+            if encoded.len() != 56 {
+                return false;
+            }
+        }
+        VersionBytes::Med25519PublicKey => {
+            if encoded.len() != 69 {
+                return false;
+            }
+        }
+        VersionBytes::SignedPayload => {
+            if encoded.len() < 56 || encoded.len() > 165 {
+                return false;
+            }
+        }
+    };
+
+    match decode_check(v, encoded) {
+        Ok(decoded) => match v {
+            VersionBytes::Ed25519PublicKey
+            | VersionBytes::Ed25519SecretSeed
+            | VersionBytes::PreAuthTx
+            | VersionBytes::Sha256Hash => decoded.len() == 32,
+            VersionBytes::Med25519PublicKey => decoded.len() == 40,
+            VersionBytes::SignedPayload => {
+                decoded.len() >= 32 + 4 + 4 && decoded.len() <= 32 + 4 + 64
+            }
+        },
+        Err(_err) => false,
+    }
 }
 
 #[cfg(test)]
@@ -113,7 +148,7 @@ mod tests {
     #[test]
     fn test_encode() {
         let encoded_public = encode_check(
-            VersionBytes::Ed25519PublicKey,
+            &VersionBytes::Ed25519PublicKey,
             &mut vec![
                 91_u8, 49_u8, 118_u8, 218_u8, 79_u8, 232_u8, 118_u8, 216_u8, 114_u8, 82_u8, 9_u8,
                 175_u8, 17_u8, 217_u8, 95_u8, 50_u8, 155_u8, 52_u8, 15_u8, 112_u8, 137_u8, 99_u8,
@@ -130,7 +165,7 @@ mod tests {
     #[test]
     fn test_decode() {
         let decoded_public = decode_check(
-            VersionBytes::Ed25519PublicKey,
+            &VersionBytes::Ed25519PublicKey,
             "GBNTC5W2J7UHNWDSKIE26EOZL4ZJWNAPOCEWGZNMFBUM7GU2EFYVZNOL",
         )
         .unwrap();
@@ -143,5 +178,18 @@ mod tests {
             ],
             decoded_public,
         );
+    }
+
+    #[test]
+    fn test_is_valid() {
+        assert!(is_valid(
+            &VersionBytes::Ed25519PublicKey,
+            "GBNTC5W2J7UHNWDSKIE26EOZL4ZJWNAPOCEWGZNMFBUM7GU2EFYVZNOL",
+        ));
+
+        assert!(!is_valid(
+            &VersionBytes::Ed25519PublicKey,
+            "GBNTC5W2J7UHNWDSKIE26EOZL4ZJWNAPOCEWGZNMFBUM7GU2EFYVZNOB",
+        ));
     }
 }
