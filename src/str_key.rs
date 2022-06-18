@@ -3,7 +3,7 @@ use byteorder::{ByteOrder, LittleEndian};
 use crc::{Crc, CRC_16_XMODEM};
 use data_encoding::BASE32;
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub enum VersionBytes {
     Ed25519PublicKey,  // G
     Ed25519SecretSeed, // S
@@ -45,12 +45,12 @@ impl TryFrom<u8> for VersionBytes {
     fn try_from(version_bye: u8) -> Result<Self, Self::Error> {
         match version_bye {
             48 => Ok(VersionBytes::Ed25519PublicKey),   //  6 << 3 == 48
-            144 => Ok(VersionBytes::Med25519PublicKey), //  18 << 3 == 144
-            96 => Ok(VersionBytes::Ed25519SecretSeed),  //  12 << 3 == 96
+            144 => Ok(VersionBytes::Ed25519SecretSeed), //  18 << 3 == 144
+            96 => Ok(VersionBytes::Med25519PublicKey),  //  12 << 3 == 96
             152 => Ok(VersionBytes::PreAuthTx),         //  19 << 3 == 152
             184 => Ok(VersionBytes::Sha256Hash),        //  23 << 3 == 184
             120 => Ok(VersionBytes::SignedPayload),     //  15 << 3 == 120
-            _ => bail!("is not supported"),
+            _ => bail!("invalid version byte"),
         }
     }
 }
