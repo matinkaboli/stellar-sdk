@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use anyhow::bail;
 use byteorder::{ByteOrder, LittleEndian};
 use crc::{Crc, CRC_16_XMODEM};
@@ -7,8 +5,8 @@ use data_encoding::BASE32;
 
 #[derive(PartialEq, Eq)]
 pub enum VersionBytes {
-    Ed25519PublicKey,
-    Ed25519SecretSeed,
+    Ed25519PublicKey,  // G
+    Ed25519SecretSeed, // S
     Med25519PublicKey, // M
     PreAuthTx,         // T
     Sha256Hash,        // X
