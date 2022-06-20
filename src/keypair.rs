@@ -198,7 +198,7 @@ mod tests {
     }
 
     #[test]
-    fn test_random() {
+    fn test_random_keypair() {
         let keypair_1 = Keypair::random().unwrap();
         let keypair_2 = Keypair::random().unwrap();
         let keypair_3 = Keypair::random().unwrap();
