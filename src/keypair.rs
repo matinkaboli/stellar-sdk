@@ -1,5 +1,5 @@
 use anyhow::bail;
-use nacl::sign::{generate_keypair, signature};
+use nacl::sign::{generate_keypair, signature, verify};
 use str_key::{decode_check, encode_check, VersionBytes};
 
 use crate::str_key;
@@ -90,19 +90,25 @@ impl Keypair {
     pub fn can_sign(&self) -> bool {
         self.secret_key.is_some()
     }
-    pub fn sign(&self, data: Vec<u8>) -> Result<Vec<u8>, anyhow::Error> {
+    pub fn sign(&self, data: &Vec<u8>) -> Result<Vec<u8>, anyhow::Error> {
         if !self.can_sign() {
             bail!("cannot sign, no secret_key available")
         }
 
         if let Some(s) = &self.secret_key {
-            match signature(&data, s) {
+            match signature(data, s) {
                 Err(_) => bail!("error while signing"),
                 Ok(m) => return Ok(m),
             }
         }
 
         bail!("error while signing")
+    }
+    pub fn verify(&self, data: &Vec<u8>, signature: &Vec<u8>) -> bool {
+        match verify(signature, data, &self.public_key) {
+            Ok(_) => true,
+            Err(_) => false,
+        }
     }
     // fn master
     // fn random
@@ -113,7 +119,6 @@ impl Keypair {
     // fn sign_payload_decorated
     // fn sign_decorated
     // fn verify
-    // fn sign
 }
 
 #[cfg(test)]
@@ -158,15 +163,36 @@ mod tests {
 
     #[test]
     fn test_sign_message() {
-        let message = "Hello World";
-        let message = message.as_bytes().to_vec();
+        let message = "Hello World".as_bytes().to_vec();
 
         let seed = String::from("SAZ443I6BNR2MD3G27C4EZIEEFMKOPT4SR6IHZDLXPODEHR2GRQVIC7R");
         let keypair = Keypair::from_secret_key(&seed).unwrap();
 
-        let signed_message = keypair.sign(message).unwrap();
-        let signed_message = String::from_utf8(signed_message).unwrap();
+        let signed_message = keypair.sign(&message).unwrap();
 
-        println!("{}", signed_message);
+        let expected_signed_message: Vec<u8> = vec![
+            249, 89, 99, 12, 220, 144, 11, 209, 11, 54, 119, 152, 58, 242, 131, 31, 212, 173, 213,
+            95, 209, 35, 15, 223, 110, 215, 31, 220, 59, 125, 147, 141, 99, 116, 156, 12, 50, 28,
+            137, 31, 0, 175, 86, 235, 92, 157, 151, 132, 88, 222, 147, 50, 248, 15, 191, 208, 153,
+            16, 41, 169, 20, 202, 137, 15,
+        ];
+
+        assert_eq!(expected_signed_message, signed_message);
+    }
+
+    #[test]
+    fn test_verify_signed_message() {
+        let seed = String::from("SAZ443I6BNR2MD3G27C4EZIEEFMKOPT4SR6IHZDLXPODEHR2GRQVIC7R");
+        let keypair = Keypair::from_secret_key(&seed).unwrap();
+
+        let unsigned_message = "Hello World".as_bytes().to_vec();
+        let signed_message: Vec<u8> = vec![
+            249, 89, 99, 12, 220, 144, 11, 209, 11, 54, 119, 152, 58, 242, 131, 31, 212, 173, 213,
+            95, 209, 35, 15, 223, 110, 215, 31, 220, 59, 125, 147, 141, 99, 116, 156, 12, 50, 28,
+            137, 31, 0, 175, 86, 235, 92, 157, 151, 132, 88, 222, 147, 50, 248, 15, 191, 208, 153,
+            16, 41, 169, 20, 202, 137, 15,
+        ];
+
+        assert!(keypair.verify(&signed_message, &unsigned_message))
     }
 }
