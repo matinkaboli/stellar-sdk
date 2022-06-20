@@ -81,11 +81,8 @@ impl Keypair {
             Some(s) => Ok(encode_check(&str_key::VersionBytes::Ed25519SecretSeed, s)),
         }
     }
-    pub fn public_key(&mut self) -> String {
-        encode_check(
-            &str_key::VersionBytes::Ed25519PublicKey,
-            &mut self.public_key,
-        )
+    pub fn public_key(&self) -> String {
+        encode_check(&str_key::VersionBytes::Ed25519PublicKey, &self.public_key)
     }
     pub fn can_sign(&self) -> bool {
         self.secret_key.is_some()
@@ -109,6 +106,10 @@ impl Keypair {
             Ok(_) => true,
             Err(_) => false,
         }
+    }
+
+    pub fn random() -> Result<Self, anyhow::Error> {
+        Self::new_from_secret_key(rand::random::<[u8; 32]>().to_vec())
     }
     // fn master
     // fn random
@@ -194,5 +195,14 @@ mod tests {
         ];
 
         assert!(keypair.verify(&signed_message, &unsigned_message))
+    }
+
+    #[test]
+    fn test_random() {
+        let keypair_1 = Keypair::random().unwrap();
+        let keypair_2 = Keypair::random().unwrap();
+        let keypair_3 = Keypair::random().unwrap();
+        assert_ne!(keypair_1.raw_secret_key(), keypair_2.raw_secret_key());
+        assert_ne!(keypair_2.raw_secret_key(), keypair_3.raw_secret_key());
     }
 }
