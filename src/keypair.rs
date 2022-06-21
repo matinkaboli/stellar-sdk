@@ -31,6 +31,7 @@ impl Keypair {
             secret_key: Some(secret_key),
         })
     }
+
     fn new_from_public_key(public_key: Vec<u8>) -> Result<Self, anyhow::Error> {
         if public_key.len() != 32 {
             bail!("public_key length is invalid")
@@ -42,11 +43,13 @@ impl Keypair {
             secret_seed: None,
         })
     }
+
     pub fn from_secret_key(secret: &str) -> Result<Self, anyhow::Error> {
         let raw_secret = decode_check(&VersionBytes::Ed25519SecretSeed, secret)?;
 
         Keypair::from_raw_ed25519_seed(&raw_secret)
     }
+
     pub fn from_public_key(public_key: &str) -> Result<Self, anyhow::Error> {
         let decoded = decode_check(&VersionBytes::Ed25519PublicKey, public_key);
 
@@ -66,27 +69,34 @@ impl Keypair {
             secret_key: None,
         })
     }
+
     pub fn from_raw_ed25519_seed(seed: &[u8]) -> Result<Self, anyhow::Error> {
         Self::new_from_secret_key(seed.to_vec())
     }
+
     pub fn raw_secret_key(&self) -> Option<Vec<u8>> {
         self.secret_seed.clone()
     }
+
     pub fn raw_public_key(&self) -> &Vec<u8> {
         &self.public_key
     }
+
     pub fn secret_key(&mut self) -> Result<String, anyhow::Error> {
         match &mut self.secret_seed {
             None => bail!("no secret_key available"),
             Some(s) => Ok(encode_check(&str_key::VersionBytes::Ed25519SecretSeed, s)),
         }
     }
+
     pub fn public_key(&self) -> String {
         encode_check(&str_key::VersionBytes::Ed25519PublicKey, &self.public_key)
     }
+
     pub fn can_sign(&self) -> bool {
         self.secret_key.is_some()
     }
+
     pub fn sign(&self, data: &Vec<u8>) -> Result<Vec<u8>, anyhow::Error> {
         if !self.can_sign() {
             bail!("cannot sign, no secret_key available")
@@ -101,6 +111,7 @@ impl Keypair {
 
         bail!("error while signing")
     }
+
     pub fn verify(&self, data: &Vec<u8>, signature: &Vec<u8>) -> bool {
         match verify(signature, data, &self.public_key) {
             Ok(_) => true,
@@ -112,14 +123,12 @@ impl Keypair {
         Self::new_from_secret_key(rand::random::<[u8; 32]>().to_vec())
     }
     // fn master
-    // fn random
     // fn xdr_account_id
     // fn xdr_public_key
     // fn xdr_muxed_account
     // fn signature_hint
     // fn sign_payload_decorated
     // fn sign_decorated
-    // fn verify
 }
 
 #[cfg(test)]
@@ -202,6 +211,7 @@ mod tests {
         let keypair_1 = Keypair::random().unwrap();
         let keypair_2 = Keypair::random().unwrap();
         let keypair_3 = Keypair::random().unwrap();
+
         assert_ne!(keypair_1.raw_secret_key(), keypair_2.raw_secret_key());
         assert_ne!(keypair_2.raw_secret_key(), keypair_3.raw_secret_key());
     }
