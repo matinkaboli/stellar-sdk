@@ -48,10 +48,6 @@
 //!     );
 //!     let usdc_liquidity_pools = s.liquidity_pools().for_assets(vec![usdc]).call().unwrap();
 //!
-//!     println!("{:#?}", my_txs);
-//!     println!("{:#?}", xlm_trades);
-//!     println!("{:#?}", my_acc);
-//!     println!("{:#?}", usdc_liquidity_pools);
 //! ```
 
 mod api_call;
@@ -63,6 +59,8 @@ pub mod utils;
 
 pub use endpoints::CallBuilder;
 pub use endpoints::Server;
+pub use keypair::Keypair;
+pub use str_key::StrKey;
 
 #[cfg(test)]
 mod tests {
@@ -77,14 +75,14 @@ mod tests {
         let s = String::from("https://horizon.stellar.org");
         let s = Server::new(s);
 
-        let my_acc = s
+        let _my_acc = s
             .load_account("GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM")
             .unwrap();
 
         // Load transactions of an account
         let my_account_id =
             String::from("GAP2TJNW7NL52MPB36DZ2PB6PSIBEUEJXDG325BJQKUNDQBPKX3E2DLV");
-        let my_txs = s
+        let _my_txs = s
             .transactions()
             .order(Direction::Desc)
             .limit(2)
@@ -101,7 +99,7 @@ mod tests {
 
         let native = Asset::native();
 
-        let xlm_trades = s
+        let _xlm_trades = s
             .trades()
             .for_asset_pair(&y_xlm, &native)
             .limit(2)
@@ -113,11 +111,6 @@ mod tests {
             String::from("USDC"),
             String::from("GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"),
         );
-        let usdc_liquidity_pools = s.liquidity_pools().for_assets(vec![usdc]).call().unwrap();
-
-        println!("{:#?}", my_txs);
-        println!("{:#?}", xlm_trades);
-        println!("{:#?}", my_acc);
-        println!("{:#?}", usdc_liquidity_pools);
+        let _usdc_liquidity_pools = s.liquidity_pools().for_assets(vec![usdc]).call().unwrap();
     }
 }

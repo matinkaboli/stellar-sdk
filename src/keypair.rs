@@ -1,11 +1,11 @@
 use anyhow::bail;
 use nacl::sign::{generate_keypair, signature, verify};
-use str_key::{decode_check, encode_check, VersionBytes};
+use str_key::StrKey;
 
 use crate::str_key;
 
 #[derive(Debug)]
-struct Keypair {
+pub struct Keypair {
     public_key: Vec<u8>,
     secret_key: Option<Vec<u8>>,
     secret_seed: Option<Vec<u8>>,
@@ -45,26 +45,21 @@ impl Keypair {
     }
 
     pub fn from_secret_key(secret: &str) -> Result<Self, anyhow::Error> {
-        let raw_secret = decode_check(&VersionBytes::Ed25519SecretSeed, secret)?;
+        let raw_secret = StrKey::decode_ed25519_secret_seed(secret)?;
 
         Keypair::from_raw_ed25519_seed(&raw_secret)
     }
 
     pub fn from_public_key(public_key: &str) -> Result<Self, anyhow::Error> {
-        let decoded = decode_check(&VersionBytes::Ed25519PublicKey, public_key);
+        let decoded = StrKey::decode_ed25519_public_key(public_key)?;
+        // let decoded = decode_check(&VersionBytes::Ed25519PublicKey, public_key);
 
-        if decoded.is_err() {
-            bail!("Invalid Stellar public key")
-        }
-
-        let pk = decoded.unwrap();
-
-        if pk.len() != 32 {
+        if decoded.len() != 32 {
             bail!("Invalid Stellar public key")
         }
 
         Ok(Self {
-            public_key: pk,
+            public_key: decoded,
             secret_seed: None,
             secret_key: None,
         })
@@ -85,19 +80,19 @@ impl Keypair {
     pub fn secret_key(&mut self) -> Result<String, anyhow::Error> {
         match &mut self.secret_seed {
             None => bail!("no secret_key available"),
-            Some(s) => Ok(encode_check(&str_key::VersionBytes::Ed25519SecretSeed, s)),
+            Some(s) => Ok(StrKey::encode_ed25519_secret_seed(s)),
         }
     }
 
     pub fn public_key(&self) -> String {
-        encode_check(&str_key::VersionBytes::Ed25519PublicKey, &self.public_key)
+        StrKey::encode_ed25519_public_key(&self.public_key)
     }
 
     pub fn can_sign(&self) -> bool {
         self.secret_key.is_some()
     }
 
-    pub fn sign(&self, data: &Vec<u8>) -> Result<Vec<u8>, anyhow::Error> {
+    pub fn sign(&self, data: &[u8]) -> Result<Vec<u8>, anyhow::Error> {
         if !self.can_sign() {
             bail!("cannot sign, no secret_key available")
         }
@@ -112,16 +107,14 @@ impl Keypair {
         bail!("error while signing")
     }
 
-    pub fn verify(&self, data: &Vec<u8>, signature: &Vec<u8>) -> bool {
-        match verify(signature, data, &self.public_key) {
-            Ok(_) => true,
-            Err(_) => false,
-        }
+    pub fn verify(&self, data: &[u8], signature: &[u8]) -> bool {
+        verify(signature, data, &self.public_key).is_ok()
     }
 
     pub fn random() -> Result<Self, anyhow::Error> {
         Self::new_from_secret_key(rand::random::<[u8; 32]>().to_vec())
     }
+
     // fn master
     // fn xdr_account_id
     // fn xdr_public_key
@@ -134,7 +127,6 @@ impl Keypair {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::str_key;
 
     #[test]
     fn test_from_secret_key() {
@@ -162,7 +154,7 @@ mod tests {
     #[test]
     fn test_from_raw_seed() {
         let seed = String::from("SAZ443I6BNR2MD3G27C4EZIEEFMKOPT4SR6IHZDLXPODEHR2GRQVIC7R");
-        let raw_seed = decode_check(&VersionBytes::Ed25519SecretSeed, &seed).unwrap();
+        let raw_seed = StrKey::decode_ed25519_secret_seed(&seed).unwrap();
 
         let keypair = Keypair::from_raw_ed25519_seed(&raw_seed).unwrap();
 
@@ -180,7 +172,7 @@ mod tests {
 
         let signed_message = keypair.sign(&message).unwrap();
 
-        let expected_signed_message: Vec<u8> = vec![
+        let expected_signed_message = vec![
             249, 89, 99, 12, 220, 144, 11, 209, 11, 54, 119, 152, 58, 242, 131, 31, 212, 173, 213,
             95, 209, 35, 15, 223, 110, 215, 31, 220, 59, 125, 147, 141, 99, 116, 156, 12, 50, 28,
             137, 31, 0, 175, 86, 235, 92, 157, 151, 132, 88, 222, 147, 50, 248, 15, 191, 208, 153,
@@ -196,7 +188,7 @@ mod tests {
         let keypair = Keypair::from_secret_key(&seed).unwrap();
 
         let unsigned_message = "Hello World".as_bytes().to_vec();
-        let signed_message: Vec<u8> = vec![
+        let signed_message = vec![
             249, 89, 99, 12, 220, 144, 11, 209, 11, 54, 119, 152, 58, 242, 131, 31, 212, 173, 213,
             95, 209, 35, 15, 223, 110, 215, 31, 220, 59, 125, 147, 141, 99, 116, 156, 12, 50, 28,
             137, 31, 0, 175, 86, 235, 92, 157, 151, 132, 88, 222, 147, 50, 248, 15, 191, 208, 153,

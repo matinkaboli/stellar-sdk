@@ -4,7 +4,7 @@ use crc::{Crc, CRC_16_XMODEM};
 use data_encoding::BASE32;
 
 #[derive(PartialEq, Eq, Clone, Debug)]
-pub enum VersionBytes {
+enum VersionBytes {
     Ed25519PublicKey,  // G
     Ed25519SecretSeed, // S
     Med25519PublicKey, // M
@@ -16,12 +16,12 @@ pub enum VersionBytes {
 impl ToString for VersionBytes {
     fn to_string(&self) -> String {
         match self {
-            VersionBytes::Ed25519PublicKey => String::from("G"),
-            VersionBytes::Ed25519SecretSeed => String::from("S"),
-            VersionBytes::Med25519PublicKey => String::from("M"),
-            VersionBytes::PreAuthTx => String::from("T"),
-            VersionBytes::Sha256Hash => String::from("X"),
-            VersionBytes::SignedPayload => String::from("P"),
+            VersionBytes::Ed25519PublicKey => String::from("ed25519PublicKey"),
+            VersionBytes::Ed25519SecretSeed => String::from("ed25519SecretSeed"),
+            VersionBytes::Med25519PublicKey => String::from("med25519PublicKey"),
+            VersionBytes::PreAuthTx => String::from("preAuthTx"),
+            VersionBytes::Sha256Hash => String::from("sha256Hash"),
+            VersionBytes::SignedPayload => String::from("signedPayload"),
         }
     }
 }
@@ -55,6 +55,22 @@ impl TryFrom<u8> for VersionBytes {
     }
 }
 
+impl TryFrom<char> for VersionBytes {
+    type Error = anyhow::Error;
+
+    fn try_from(version_bye: char) -> Result<Self, Self::Error> {
+        match version_bye {
+            'G' => Ok(VersionBytes::Ed25519PublicKey),
+            'S' => Ok(VersionBytes::Ed25519SecretSeed),
+            'M' => Ok(VersionBytes::Med25519PublicKey),
+            'T' => Ok(VersionBytes::PreAuthTx),
+            'X' => Ok(VersionBytes::Sha256Hash),
+            'P' => Ok(VersionBytes::SignedPayload),
+            _ => bail!("invalid version byte"),
+        }
+    }
+}
+
 fn calculate_checksum(bytes: &[u8]) -> Vec<u8> {
     let mut unencoded: Vec<u8> = vec![0; 2];
     let crc: Crc<u16> = Crc::<u16>::new(&CRC_16_XMODEM);
@@ -63,16 +79,16 @@ fn calculate_checksum(bytes: &[u8]) -> Vec<u8> {
     unencoded
 }
 
-pub fn encode_check(v: &VersionBytes, data: &Vec<u8>) -> String {
+fn encode_check(v: &VersionBytes, data: &[u8]) -> String {
     let mut bytes: Vec<u8> = vec![v.clone().into()];
-    bytes.append(&mut data.clone());
+    bytes.append(&mut data.to_owned());
     let mut checksum = calculate_checksum(&bytes);
     bytes.append(&mut checksum);
 
     BASE32.encode(&bytes)
 }
 
-pub fn decode_check(v: &VersionBytes, encoded_data: &str) -> Result<Vec<u8>, anyhow::Error> {
+fn decode_check(v: &VersionBytes, encoded_data: &str) -> Result<Vec<u8>, anyhow::Error> {
     let decoded = BASE32.decode(encoded_data.as_bytes())?;
     let version_byte: VersionBytes = VersionBytes::try_from(decoded[0])?;
     let payload = &decoded[..decoded.len() - 2];
@@ -95,7 +111,7 @@ pub fn decode_check(v: &VersionBytes, encoded_data: &str) -> Result<Vec<u8>, any
     Ok(data.to_vec())
 }
 
-pub fn is_valid(v: &VersionBytes, encoded: &str) -> bool {
+fn is_valid(v: &VersionBytes, encoded: &str) -> bool {
     match v {
         VersionBytes::Ed25519PublicKey
         | VersionBytes::Ed25519SecretSeed
@@ -132,6 +148,88 @@ pub fn is_valid(v: &VersionBytes, encoded: &str) -> bool {
     }
 }
 
+pub struct StrKey;
+
+impl StrKey {
+    pub fn encode_ed25519_public_key(data: &[u8]) -> String {
+        encode_check(&VersionBytes::Ed25519PublicKey, data)
+    }
+
+    pub fn decode_ed25519_public_key(data: &str) -> Result<Vec<u8>, anyhow::Error> {
+        decode_check(&VersionBytes::Ed25519PublicKey, data)
+    }
+
+    pub fn is_valid_ed25519_public_key(data: &str) -> bool {
+        is_valid(&VersionBytes::Ed25519PublicKey, data)
+    }
+
+    pub fn encode_ed25519_secret_seed(data: &[u8]) -> String {
+        encode_check(&VersionBytes::Ed25519SecretSeed, data)
+    }
+
+    pub fn decode_ed25519_secret_seed(data: &str) -> Result<Vec<u8>, anyhow::Error> {
+        decode_check(&VersionBytes::Ed25519SecretSeed, data)
+    }
+
+    pub fn is_valid_ed25519_secret_seed(data: &str) -> bool {
+        is_valid(&VersionBytes::Ed25519SecretSeed, data)
+    }
+
+    pub fn encode_med25519_public_key(data: &[u8]) -> String {
+        encode_check(&VersionBytes::Med25519PublicKey, data)
+    }
+
+    pub fn decode_med25519_public_key(data: &str) -> Result<Vec<u8>, anyhow::Error> {
+        decode_check(&VersionBytes::Med25519PublicKey, data)
+    }
+
+    pub fn is_valid_med25519_public_key(data: &str) -> bool {
+        is_valid(&VersionBytes::Med25519PublicKey, data)
+    }
+
+    pub fn encode_pre_auth_tx(data: &[u8]) -> String {
+        encode_check(&VersionBytes::PreAuthTx, data)
+    }
+
+    pub fn decode_pre_auth_tx(data: &str) -> Result<Vec<u8>, anyhow::Error> {
+        decode_check(&VersionBytes::PreAuthTx, data)
+    }
+
+    pub fn is_valid_pre_auth_tx(data: &str) -> bool {
+        is_valid(&VersionBytes::PreAuthTx, data)
+    }
+
+    pub fn encode_sha256_hash(data: &[u8]) -> String {
+        encode_check(&VersionBytes::Sha256Hash, data)
+    }
+
+    pub fn decode_sha256_hash(data: &str) -> Result<Vec<u8>, anyhow::Error> {
+        decode_check(&VersionBytes::Sha256Hash, data)
+    }
+
+    pub fn is_valid_sha256_hash(data: &str) -> bool {
+        is_valid(&VersionBytes::Sha256Hash, data)
+    }
+
+    pub fn encode_signed_payload(data: &[u8]) -> String {
+        encode_check(&VersionBytes::SignedPayload, data)
+    }
+
+    pub fn decode_signed_payload(data: &str) -> Result<Vec<u8>, anyhow::Error> {
+        decode_check(&VersionBytes::SignedPayload, data)
+    }
+
+    pub fn is_valid_signed_payload(data: &str) -> bool {
+        is_valid(&VersionBytes::SignedPayload, data)
+    }
+
+    pub fn get_version_byte_for_prefix(data: &str) -> Result<String, anyhow::Error> {
+        let decoded = BASE32.decode(data.as_bytes())?;
+
+        Ok(VersionBytes::try_from(decoded[0])?.to_string())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -149,9 +247,8 @@ mod tests {
         let encoded_public = encode_check(
             &VersionBytes::Ed25519PublicKey,
             &mut vec![
-                91_u8, 49_u8, 118_u8, 218_u8, 79_u8, 232_u8, 118_u8, 216_u8, 114_u8, 82_u8, 9_u8,
-                175_u8, 17_u8, 217_u8, 95_u8, 50_u8, 155_u8, 52_u8, 15_u8, 112_u8, 137_u8, 99_u8,
-                101_u8, 172_u8, 40_u8, 104_u8, 207_u8, 154_u8, 154_u8, 33_u8, 113_u8, 92_u8,
+                91u8, 49, 118, 218, 79, 232, 118, 216, 114, 82, 9, 175, 17, 217, 95, 50, 155, 52,
+                15, 112, 137, 99, 101, 172, 40, 104, 207, 154, 154, 33, 113, 92,
             ],
         );
 
@@ -171,9 +268,8 @@ mod tests {
 
         assert_eq!(
             vec![
-                91_u8, 49_u8, 118_u8, 218_u8, 79_u8, 232_u8, 118_u8, 216_u8, 114_u8, 82_u8, 9_u8,
-                175_u8, 17_u8, 217_u8, 95_u8, 50_u8, 155_u8, 52_u8, 15_u8, 112_u8, 137_u8, 99_u8,
-                101_u8, 172_u8, 40_u8, 104_u8, 207_u8, 154_u8, 154_u8, 33_u8, 113_u8, 92_u8,
+                91u8, 49, 118, 218, 79, 232, 118, 216, 114, 82, 9, 175, 17, 217, 95, 50, 155, 52,
+                15, 112, 137, 99, 101, 172, 40, 104, 207, 154, 154, 33, 113, 92,
             ],
             decoded_public,
         );
@@ -190,5 +286,14 @@ mod tests {
             &VersionBytes::Ed25519PublicKey,
             "GBNTC5W2J7UHNWDSKIE26EOZL4ZJWNAPOCEWGZNMFBUM7GU2EFYVZNOB",
         ));
+    }
+
+    #[test]
+    fn test_get_version_byte_prefix() {
+        let my_public_key = "GBNTC5W2J7UHNWDSKIE26EOZL4ZJWNAPOCEWGZNMFBUM7GU2EFYVZNOB";
+
+        let prefix = StrKey::get_version_byte_for_prefix(my_public_key).unwrap();
+
+        assert_eq!("ed25519PublicKey", prefix)
     }
 }
