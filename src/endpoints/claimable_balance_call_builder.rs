@@ -30,7 +30,7 @@ impl<'a> ClaimableBalanceCallbuilder<'a> {
 
     pub fn asset(&mut self, asset: &Asset) -> &mut Self {
         self.query_params
-            .insert(String::from("asset"), asset.as_str());
+            .insert(String::from("asset"), asset.to_string());
 
         self
     }
@@ -112,7 +112,8 @@ mod tests {
         let lsp = Asset::new(
             String::from("LSP"),
             String::from("GAB7STHVD5BDH3EEYXPI3OM7PCS4V443PYB5FNT6CFGJVPDLMKDM24WK"),
-        );
+        )
+        .unwrap();
 
         let cbcb = ClaimableBalanceCallbuilder::new(&s)
             .asset(&lsp)
@@ -120,6 +121,6 @@ mod tests {
             .call()
             .unwrap();
 
-        assert_eq!(lsp.as_str(), cbcb._embedded.records[0].asset);
+        assert_eq!(lsp.to_string(), cbcb._embedded.records[0].asset);
     }
 }

@@ -62,7 +62,8 @@ mod tests {
         let bat = Asset::new(
             String::from("BAT"),
             String::from("GBDEVU63Y6NTHJQQZIKVTC23NWLQVP3WJ2RI2OTSJTNYOIGICST6DUXR"),
-        );
+        )
+        .unwrap();
 
         let mut ocb = OrderBookCallBuilder::new(&s, native, bat);
 

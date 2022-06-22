@@ -30,7 +30,7 @@
 //!     let y_xlm = Asset::new(
 //!         String::from("yXLM"),
 //!         String::from("GARDNV3Q7YGT4AKSDF25LT32YSCCW4EV22Y2TV3I2PU2MMXJTEDL5T55"),
-//!     );
+//!     ).unwrap();
 //!
 //!     let native = Asset::native();
 //!
@@ -45,7 +45,7 @@
 //!     let usdc = Asset::new(
 //!         String::from("USDC"),
 //!         String::from("GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"),
-//!     );
+//!     ).unwrap();
 //!     let usdc_liquidity_pools = s.liquidity_pools().for_assets(vec![usdc]).call().unwrap();
 //!
 //! ```
@@ -95,7 +95,8 @@ mod tests {
         let y_xlm = Asset::new(
             String::from("yXLM"),
             String::from("GARDNV3Q7YGT4AKSDF25LT32YSCCW4EV22Y2TV3I2PU2MMXJTEDL5T55"),
-        );
+        )
+        .unwrap();
 
         let native = Asset::native();
 
@@ -110,7 +111,8 @@ mod tests {
         let usdc = Asset::new(
             String::from("USDC"),
             String::from("GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"),
-        );
+        )
+        .unwrap();
         let _usdc_liquidity_pools = s.liquidity_pools().for_assets(vec![usdc]).call().unwrap();
     }
 }

@@ -107,7 +107,8 @@ mod tests {
         let y_usdc = Asset::new(
             String::from("yUSDC"),
             String::from("GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF"),
-        );
+        )
+        .unwrap();
         let mut tcb = TradeCallBuilder::new(&s);
 
         let records = tcb

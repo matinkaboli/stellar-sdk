@@ -12,6 +12,8 @@ use crate::types::{
     StrictPathSource, Transaction,
 };
 
+use super::EffectCallBuilder;
+
 #[derive(Debug)]
 pub struct Server(pub String);
 
@@ -135,6 +137,10 @@ impl Server {
     pub fn fee_stats(&self) -> Result<FeeStats, anyhow::Error> {
         let url = format!("{}/fee_stats", self.0);
         api_call::<FeeStats>(url, crate::types::HttpMethod::GET, &HashMap::new())
+    }
+
+    pub fn effects(&self) -> EffectCallBuilder {
+        EffectCallBuilder::new(self)
     }
 }
 

@@ -64,7 +64,7 @@ impl<'a> StrictReceiveCallBuilder<'a> {
                 String::from("source_assets"),
                 assets
                     .iter()
-                    .map(|asset| asset.as_str())
+                    .map(|asset| asset.to_string())
                     .collect::<Vec<String>>()
                     .join(","),
             ),

@@ -1,23 +1,38 @@
 use std::{collections::HashMap, str::FromStr};
 
+use anyhow::bail;
+use regex::Regex;
+
+use crate::StrKey;
+
 #[derive(Debug)]
-pub struct Asset(pub String, pub String, pub bool);
+pub struct Asset(String, String, bool); // code, issuer, is_native
 
 impl Asset {
-    pub fn new(code: String, issuer: String) -> Self {
-        Asset(code, issuer, false)
+    pub fn new(code: String, issuer: String) -> Result<Self, anyhow::Error> {
+        if !StrKey::is_valid_ed25519_public_key(&issuer) {
+            bail!("invalid issuer")
+        }
+
+        let re = Regex::new("^[a-zA-Z0-9]{1,12}$").unwrap();
+
+        if !re.is_match(&code) {
+            bail!("invalid code")
+        }
+
+        Ok(Asset(code, issuer, false))
+    }
+
+    pub fn get_code(&self) -> String {
+        self.0.clone()
+    }
+
+    pub fn get_issuer(&self) -> String {
+        self.1.clone()
     }
 
     pub fn native() -> Self {
         Asset(String::from("XLM"), String::from(""), true)
-    }
-
-    pub fn as_str(&self) -> String {
-        if self.2 {
-            return String::from("native");
-        }
-
-        format!("{}:{}", self.0, self.1)
     }
 
     pub fn get_type(&self) -> String {
@@ -30,23 +45,6 @@ impl Asset {
         }
 
         String::from("credit_alphanum12")
-    }
-
-    #[deprecated]
-    pub fn as_querystring(&self, name: String) -> String {
-        if self.get_type() == "native" {
-            return format!("&{}_asset_type={}", name, "native");
-        }
-
-        format!(
-            "&{}_asset_type={}&{}_asset_code={}&{}_asset_issuer={}",
-            name,
-            self.get_type(),
-            name,
-            self.0,
-            name,
-            self.1,
-        )
     }
 
     pub fn as_querystring_hashmap(&self, name: String) -> HashMap<String, String> {
@@ -64,14 +62,23 @@ impl Asset {
     }
 }
 
-impl FromStr for Asset {
-    type Err = ();
+impl ToString for Asset {
+    fn to_string(&self) -> String {
+        if self.2 {
+            return String::from("native");
+        }
 
-    fn from_str(s: &str) -> Result<Self, ()> {
+        format!("{}:{}", self.0, self.1)
+    }
+}
+impl FromStr for Asset {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         let a = String::from(s);
         let parts = a.split(':').collect::<Vec<&str>>();
 
-        Ok(Self(String::from(parts[0]), String::from(parts[1]), false))
+        Self::new(String::from(parts[0]), String::from(parts[1]))
     }
 }
 impl Eq for Asset {}
@@ -90,12 +97,13 @@ mod tests {
         let usdc = Asset::new(
             String::from("USDC"),
             String::from("GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"),
-        );
+        )
+        .unwrap();
 
         let asset_in_str =
             String::from("USDC:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN");
 
-        assert_eq!(usdc.as_str(), asset_in_str);
+        assert_eq!(usdc.to_string(), asset_in_str);
     }
 
     #[test]
@@ -103,7 +111,8 @@ mod tests {
         let usdc = Asset::new(
             String::from("USDC"),
             String::from("GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"),
-        );
+        )
+        .unwrap();
 
         let xlm = Asset::native();
 
@@ -115,12 +124,14 @@ mod tests {
         let usdc = Asset::new(
             String::from("USDC"),
             String::from("GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"),
-        );
+        )
+        .unwrap();
 
         let aqua = Asset::new(
             String::from("AQUA"),
             String::from("GBNZILSTVQZ4R7IKQDGHYGY2QXL5QOFJYQMXPKWRRM5PAV7Y4M67AQUA"),
-        );
+        )
+        .unwrap();
 
         assert!(usdc != aqua);
     }
@@ -130,12 +141,14 @@ mod tests {
         let rbt = Asset::new(
             String::from("RBT"),
             String::from("GBSQR5CTKWYQXDGB2KHPB4IZL2FO4KVOWH72WEUSZII7Q32HGGIPSOYS"),
-        );
+        )
+        .unwrap();
 
         let doget = Asset::new(
             String::from("DOGET"),
             String::from("GDOEVDDBU6OBWKL7VHDAOKD77UP4DKHQYKOKJJT5PR3WRDBTX35HUEUX"),
-        );
+        )
+        .unwrap();
 
         let xlm = Asset::native();
 
@@ -150,6 +163,16 @@ mod tests {
 
         let asset = Asset::from_str(asset_str).unwrap();
 
-        assert_eq!(String::from(asset_str), asset.as_str());
+        assert_eq!(String::from(asset_str), asset.to_string());
+    }
+
+    #[test]
+    fn test_validate_asset() {
+        let my_wrong_asset_code = String::from(":#$%");
+        let issuer = String::from("GDM4RQUQQUVSKQA7S6EM7XBZP3FCGH4Q7CL6TABQ7B2BEJ5ERARM2M5M");
+
+        let ast = Asset::new(my_wrong_asset_code, issuer);
+
+        assert!(ast.is_err());
     }
 }

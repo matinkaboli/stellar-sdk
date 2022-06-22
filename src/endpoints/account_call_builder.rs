@@ -44,7 +44,7 @@ impl<'a> AccountCallBuilder<'a> {
 
     pub fn asset(&mut self, asset: &Asset) -> &mut Self {
         self.query_params
-            .insert(String::from("asset"), asset.as_str());
+            .insert(String::from("asset"), asset.to_string());
 
         self
     }

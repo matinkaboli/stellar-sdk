@@ -23,14 +23,14 @@ impl<'a> OfferCallBuilder<'a> {
 
     pub fn selling(&mut self, asset: &Asset) -> &mut Self {
         self.query_params
-            .insert(String::from("selling"), asset.as_str());
+            .insert(String::from("selling"), asset.to_string());
 
         self
     }
 
     pub fn buying(&mut self, asset: &Asset) -> &mut Self {
         self.query_params
-            .insert(String::from("buying"), asset.as_str());
+            .insert(String::from("buying"), asset.to_string());
 
         self
     }
@@ -112,7 +112,8 @@ mod tests {
         let y_xlm = Asset::new(
             String::from("yXLM"),
             String::from("GARDNV3Q7YGT4AKSDF25LT32YSCCW4EV22Y2TV3I2PU2MMXJTEDL5T55"),
-        );
+        )
+        .unwrap();
         let xlm = Asset::native();
 
         let records = OfferCallBuilder::new(&s)
@@ -127,6 +128,9 @@ mod tests {
             Some(String::from("yXLM"))
         );
 
-        assert_eq!(records._embedded.records[1].buying.asset_type, xlm.as_str());
+        assert_eq!(
+            records._embedded.records[1].buying.asset_type,
+            xlm.to_string()
+        );
     }
 }

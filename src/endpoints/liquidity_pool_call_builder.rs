@@ -26,7 +26,7 @@ impl<'a> LiquidityPoolCallBuilder<'a> {
             String::from("reserves"),
             assets
                 .into_iter()
-                .map(|asset| asset.as_str())
+                .map(|asset| asset.to_string())
                 .collect::<Vec<String>>()
                 .join(","),
         );
@@ -99,11 +99,13 @@ mod tests {
         let y_xlm = Asset::new(
             String::from("yXLM"),
             String::from("GARDNV3Q7YGT4AKSDF25LT32YSCCW4EV22Y2TV3I2PU2MMXJTEDL5T55"),
-        );
+        )
+        .unwrap();
         let y_usdc = Asset::new(
             String::from("yUSDC"),
             String::from("GDGTVWSM4MGS4T7Z6W4RPWOCHE2I6RDFCIFZGS3DOA63LWQTRNZNTTFF"),
-        );
+        )
+        .unwrap();
 
         let mut lpcb = LiquidityPoolCallBuilder::new(&s);
 
