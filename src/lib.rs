@@ -53,12 +53,14 @@
 mod api_call;
 mod endpoints;
 mod keypair;
+mod operations;
 mod str_key;
 pub mod types;
 pub mod utils;
 
 pub use endpoints::CallBuilder;
 pub use endpoints::Server;
+pub use endpoints::StellarTomlResolver;
 pub use keypair::Keypair;
 pub use str_key::StrKey;
 
