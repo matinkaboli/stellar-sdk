@@ -10,6 +10,7 @@ pub struct LiquidityPoolCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
     query_params: HashMap<String, String>,
+    token: &'a Option<String>,
 }
 
 impl<'a> LiquidityPoolCallBuilder<'a> {
@@ -18,6 +19,7 @@ impl<'a> LiquidityPoolCallBuilder<'a> {
             server_url: &s.0,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
+            token: &s.1,
         }
     }
 
@@ -71,7 +73,12 @@ impl<'a> CallBuilder<LiquidityPool> for LiquidityPoolCallBuilder<'a> {
             "/liquidity_pools",
         );
 
-        api_call::<Record<LiquidityPool>>(url, crate::types::HttpMethod::GET, &self.query_params)
+        api_call::<Record<LiquidityPool>>(
+            url,
+            crate::types::HttpMethod::GET,
+            &self.query_params,
+            self.token,
+        )
     }
 }
 

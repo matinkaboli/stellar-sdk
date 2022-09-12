@@ -246,7 +246,7 @@ mod tests {
     fn test_encode() {
         let encoded_public = encode_check(
             &VersionBytes::Ed25519PublicKey,
-            &mut vec![
+            &mut [
                 91u8, 49, 118, 218, 79, 232, 118, 216, 114, 82, 9, 175, 17, 217, 95, 50, 155, 52,
                 15, 112, 137, 99, 101, 172, 40, 104, 207, 154, 154, 33, 113, 92,
             ],

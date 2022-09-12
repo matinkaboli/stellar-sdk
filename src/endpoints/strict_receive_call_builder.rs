@@ -10,6 +10,7 @@ use crate::CallBuilder;
 pub struct StrictReceiveCallBuilder<'a> {
     server_url: &'a str,
     query_params: HashMap<String, String>,
+    token: &'a Option<String>,
 }
 
 impl<'a> CallBuilder<StrictPath> for StrictReceiveCallBuilder<'a> {
@@ -40,7 +41,12 @@ impl<'a> CallBuilder<StrictPath> for StrictReceiveCallBuilder<'a> {
 
     fn call(&self) -> Result<Record<StrictPath>, anyhow::Error> {
         let url = format!("{}{}", &self.server_url, "/paths/strict-receive");
-        api_call::<Record<StrictPath>>(url, crate::types::HttpMethod::GET, &self.query_params)
+        api_call::<Record<StrictPath>>(
+            url,
+            crate::types::HttpMethod::GET,
+            &self.query_params,
+            self.token,
+        )
     }
 }
 
@@ -54,6 +60,7 @@ impl<'a> StrictReceiveCallBuilder<'a> {
         let mut new_self = Self {
             server_url: &s.0,
             query_params: HashMap::new(),
+            token: &s.1,
         };
 
         match source {

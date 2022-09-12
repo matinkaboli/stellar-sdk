@@ -10,6 +10,7 @@ pub struct OrderBookCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
     query_params: HashMap<String, String>,
+    token: &'a Option<String>,
 }
 
 impl<'a> OrderBookCallBuilder<'a> {
@@ -18,6 +19,7 @@ impl<'a> OrderBookCallBuilder<'a> {
             server_url: &s.0,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
+            token: &s.1,
         };
 
         new_self
@@ -46,7 +48,12 @@ impl<'a> OrderBookCallBuilder<'a> {
             "/order_book"
         );
 
-        api_call::<OrderBook>(url, crate::types::HttpMethod::GET, &self.query_params)
+        api_call::<OrderBook>(
+            url,
+            crate::types::HttpMethod::GET,
+            &self.query_params,
+            self.token,
+        )
     }
 }
 

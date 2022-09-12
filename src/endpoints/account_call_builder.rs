@@ -10,6 +10,7 @@ pub struct AccountCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
     query_params: HashMap<String, String>,
+    token: &'a Option<String>,
 }
 
 impl<'a> AccountCallBuilder<'a> {
@@ -18,6 +19,7 @@ impl<'a> AccountCallBuilder<'a> {
             server_url: &s.0,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
+            token: &s.1,
         }
     }
 
@@ -59,7 +61,12 @@ impl<'a> CallBuilder<Account> for AccountCallBuilder<'a> {
             "/accounts",
         );
 
-        api_call::<Record<Account>>(url, crate::types::HttpMethod::GET, &self.query_params)
+        api_call::<Record<Account>>(
+            url,
+            crate::types::HttpMethod::GET,
+            &self.query_params,
+            self.token,
+        )
     }
 
     fn cursor(&mut self, cursor: &str) -> &mut Self {

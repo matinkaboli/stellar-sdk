@@ -11,6 +11,7 @@ pub struct TradeAggregationCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
     query_params: HashMap<String, String>,
+    token: &'a Option<String>,
 }
 
 impl<'a> TradeAggregationCallBuilder<'a> {
@@ -19,6 +20,7 @@ impl<'a> TradeAggregationCallBuilder<'a> {
             server_url: &s.0,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
+            token: &s.1,
         };
 
         new_self
@@ -65,7 +67,12 @@ impl<'a> CallBuilder<TradeAggregation> for TradeAggregationCallBuilder<'a> {
 
     fn call(&self) -> Result<Record<TradeAggregation>, anyhow::Error> {
         let url = format!("{}{}", &self.server_url, "/trade_aggregations");
-        api_call::<Record<TradeAggregation>>(url, crate::types::HttpMethod::GET, &self.query_params)
+        api_call::<Record<TradeAggregation>>(
+            url,
+            crate::types::HttpMethod::GET,
+            &self.query_params,
+            self.token,
+        )
     }
 }
 

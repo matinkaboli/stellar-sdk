@@ -10,6 +10,7 @@ pub struct OfferCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
     query_params: HashMap<String, String>,
+    token: &'a Option<String>,
 }
 
 impl<'a> OfferCallBuilder<'a> {
@@ -18,6 +19,7 @@ impl<'a> OfferCallBuilder<'a> {
             server_url: &s.0,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
+            token: &s.1,
         }
     }
 
@@ -86,7 +88,12 @@ impl<'a> CallBuilder<Offer> for OfferCallBuilder<'a> {
             "/offers"
         );
 
-        api_call::<Record<Offer>>(url, crate::types::HttpMethod::GET, &self.query_params)
+        api_call::<Record<Offer>>(
+            url,
+            crate::types::HttpMethod::GET,
+            &self.query_params,
+            self.token,
+        )
     }
 }
 
