@@ -9,11 +9,15 @@ pub fn api_call<T: DeserializeOwned>(
     url: String,
     method: HttpMethod,
     query_params: &HashMap<String, String>,
+    token: &Option<String>,
 ) -> Result<T, anyhow::Error> {
     let mut req = match method {
         HttpMethod::GET => ureq::get(&url),
         HttpMethod::POST => ureq::post(&url),
     };
+    if token.is_some() {
+        req = req.set("Authorization", token.clone().unwrap().as_str());
+    }
 
     for query_param in query_params.iter() {
         req = req.query(query_param.0, query_param.1);

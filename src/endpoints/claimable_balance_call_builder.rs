@@ -10,6 +10,7 @@ pub struct ClaimableBalanceCallbuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
     query_params: HashMap<String, String>,
+    token: &'a Option<String>,
 }
 
 impl<'a> ClaimableBalanceCallbuilder<'a> {
@@ -18,6 +19,7 @@ impl<'a> ClaimableBalanceCallbuilder<'a> {
             server_url: &s.0,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
+            token: &s.1,
         }
     }
 
@@ -79,7 +81,12 @@ impl<'a> CallBuilder<ClaimableBalance> for ClaimableBalanceCallbuilder<'a> {
             "/claimable_balances",
         );
 
-        api_call::<Record<ClaimableBalance>>(url, crate::types::HttpMethod::GET, &self.query_params)
+        api_call::<Record<ClaimableBalance>>(
+            url,
+            crate::types::HttpMethod::GET,
+            &self.query_params,
+            self.token,
+        )
     }
 }
 

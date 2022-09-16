@@ -10,6 +10,7 @@ pub struct PaymentCallBuilder<'a> {
     server_url: &'a str,
     endpoint: Endpoint,
     query_params: HashMap<String, String>,
+    token: &'a Option<String>,
 }
 
 impl<'a> PaymentCallBuilder<'a> {
@@ -18,6 +19,7 @@ impl<'a> PaymentCallBuilder<'a> {
             server_url: &s.0,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
+            token: &s.1,
         }
     }
 }
@@ -58,7 +60,12 @@ impl<'a> CallBuilder<Operation> for PaymentCallBuilder<'a> {
             "/payments",
         );
 
-        api_call::<Record<Operation>>(url, crate::types::HttpMethod::GET, &self.query_params)
+        api_call::<Record<Operation>>(
+            url,
+            crate::types::HttpMethod::GET,
+            &self.query_params,
+            self.token,
+        )
     }
 }
 

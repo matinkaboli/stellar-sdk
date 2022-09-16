@@ -15,16 +15,20 @@ use crate::types::{
 use super::EffectCallBuilder;
 
 #[derive(Debug)]
-pub struct Server(pub String);
+pub struct Server(pub String, pub Option<String>);
 
 impl Server {
     pub fn new(network_id: String) -> Self {
-        Server(network_id)
+        Server(network_id, None)
+    }
+
+    pub fn set_auth_token(&mut self, token: String) {
+        self.1 = Option::from(token);
     }
 
     pub fn load_account(&self, account_id: &str) -> Result<Account, anyhow::Error> {
         let url = format!("{}/accounts/{}", self.0, account_id);
-        api_call::<Account>(url, crate::types::HttpMethod::GET, &HashMap::new())
+        api_call::<Account>(url, crate::types::HttpMethod::GET, &HashMap::new(), &self.1)
     }
 
     pub fn accounts(&self) -> AccountCallBuilder {
@@ -33,7 +37,7 @@ impl Server {
 
     pub fn load_transaction(&self, hash: &str) -> Result<Transaction, anyhow::Error> {
         let url = format!("{}/transactions/{}", self.0, hash);
-        api_call::<Transaction>(url, crate::types::HttpMethod::GET, &HashMap::new())
+        api_call::<Transaction>(url, crate::types::HttpMethod::GET, &HashMap::new(), &self.1)
     }
 
     pub fn transactions(&self) -> TransactionCallBuilder {
@@ -42,7 +46,7 @@ impl Server {
 
     pub fn load_ledger(&self, sequence: u64) -> Result<Ledger, anyhow::Error> {
         let url = format!("{}/ledgers/{}", self.0, sequence);
-        api_call::<Ledger>(url, crate::types::HttpMethod::GET, &HashMap::new())
+        api_call::<Ledger>(url, crate::types::HttpMethod::GET, &HashMap::new(), &self.1)
     }
 
     pub fn ledgers(&self) -> LedgerCallBuilder {
@@ -51,7 +55,7 @@ impl Server {
 
     pub fn load_offer(&self, offer_id: &str) -> Result<Offer, anyhow::Error> {
         let url = format!("{}/offers/{}", self.0, offer_id);
-        api_call::<Offer>(url, crate::types::HttpMethod::GET, &HashMap::new())
+        api_call::<Offer>(url, crate::types::HttpMethod::GET, &HashMap::new(), &self.1)
     }
 
     pub fn offers(&self) -> OfferCallBuilder {
@@ -60,7 +64,7 @@ impl Server {
 
     pub fn load_operation(&self, operation_id: &str) -> Result<Operation, anyhow::Error> {
         let url = format!("{}/operations/{}", self.0, operation_id);
-        api_call::<Operation>(url, crate::types::HttpMethod::GET, &HashMap::new())
+        api_call::<Operation>(url, crate::types::HttpMethod::GET, &HashMap::new(), &self.1)
     }
 
     pub fn operations(&self) -> OperationCallBuilder {
@@ -72,7 +76,7 @@ impl Server {
         liquidity_pool_id: &str,
     ) -> Result<LiquidityPool, anyhow::Error> {
         let url = format!("{}/liquidity_pools/{}", self.0, liquidity_pool_id);
-        api_call::<LiquidityPool>(url, crate::types::HttpMethod::GET, &HashMap::new())
+        api_call::<LiquidityPool>(url, crate::types::HttpMethod::GET, &HashMap::new(), &self.1)
     }
 
     pub fn liquidity_pools(&self) -> LiquidityPoolCallBuilder {
@@ -84,7 +88,7 @@ impl Server {
         claimable_balance_id: &str,
     ) -> Result<ClaimableBalance, anyhow::Error> {
         let url = format!("{}/claimable_balances/{}", self.0, claimable_balance_id);
-        api_call::<ClaimableBalance>(url, crate::types::HttpMethod::GET, &HashMap::new())
+        api_call::<ClaimableBalance>(url, crate::types::HttpMethod::GET, &HashMap::new(), &self.1)
     }
 
     pub fn claimable_balances(&self) -> ClaimableBalanceCallbuilder {
@@ -136,7 +140,7 @@ impl Server {
 
     pub fn fee_stats(&self) -> Result<FeeStats, anyhow::Error> {
         let url = format!("{}/fee_stats", self.0);
-        api_call::<FeeStats>(url, crate::types::HttpMethod::GET, &HashMap::new())
+        api_call::<FeeStats>(url, crate::types::HttpMethod::GET, &HashMap::new(), &self.1)
     }
 
     pub fn effects(&self) -> EffectCallBuilder {
