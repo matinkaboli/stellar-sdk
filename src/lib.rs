@@ -52,6 +52,7 @@
 
 mod api_call;
 mod endpoints;
+#[cfg(feature = "nacl")]
 mod keypair;
 mod operations;
 mod str_key;
@@ -61,6 +62,7 @@ pub mod utils;
 pub use endpoints::CallBuilder;
 pub use endpoints::Server;
 pub use endpoints::StellarTomlResolver;
+#[cfg(feature = "nacl")]
 pub use keypair::Keypair;
 pub use str_key::StrKey;
 
