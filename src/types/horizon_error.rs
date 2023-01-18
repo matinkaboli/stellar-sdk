@@ -5,11 +5,11 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct HorizonError {
-    r#type: String,
-    title: String,
-    status: i16,
-    detail: String,
-    extras: Option<ExtraHorizonError>,
+    pub r#type: String,
+    pub title: String,
+    pub status: i16,
+    pub detail: String,
+    pub extras: Option<ExtraHorizonError>,
 }
 
 impl Display for HorizonError {
@@ -22,13 +22,13 @@ impl Error for HorizonError {}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ExtraHorizonError {
-    envelope_xdr: Option<String>,
-    result_codes: Option<ErrorResultCode>,
-    result_xdr: String,
+    pub envelope_xdr: Option<String>,
+    pub result_codes: Option<ErrorResultCode>,
+    pub result_xdr: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ErrorResultCode {
-    transaction: String,
-    operations: Vec<String>,
+    pub transaction: String,
+    pub operations: Vec<String>,
 }
