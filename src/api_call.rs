@@ -1,4 +1,4 @@
-use anyhow::{self, bail};
+use anyhow::{self};
 use serde::de::DeserializeOwned;
 use std::collections::HashMap;
 use ureq::{self, Error as UreqError};
@@ -32,7 +32,7 @@ pub fn api_call<T: DeserializeOwned>(
         Err(e) => match e {
             UreqError::Status(code, res) => {
                 if code >= 500 {
-                    bail!("failed");
+                    return Err(UreqError::Status(code, res).into());
                 }
 
                 let res_str = res.into_string()?;
@@ -40,7 +40,7 @@ pub fn api_call<T: DeserializeOwned>(
 
                 Err(parsed.into())
             }
-            _ => bail!("failed"),
+            other => Err(other.into()),
         },
     }
 }
