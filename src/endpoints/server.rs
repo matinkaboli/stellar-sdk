@@ -143,6 +143,12 @@ impl Server {
         api_call::<FeeStats>(url, crate::types::HttpMethod::GET, &HashMap::new(), &self.1)
     }
 
+    pub fn fetch_base_fee(&self) -> Result<String, anyhow::Error> {
+        let fee_stats = self.fee_stats()?;
+        let base_fee = fee_stats.last_ledger_base_fee;
+        Ok(base_fee)
+    }
+
     pub fn effects(&self) -> EffectCallBuilder {
         EffectCallBuilder::new(self)
     }
@@ -191,6 +197,13 @@ mod tests {
         let s = Server::new(String::from("https://horizon.stellar.org"));
 
         let _fee_stats = s.fee_stats().unwrap();
+    }
+
+    #[test]
+    fn test_load_base_fee() {
+        let s = Server::new(String::from("https://horizon.stellar.org"));
+
+        let _base_fee = s.fetch_base_fee().unwrap();
     }
 
     #[test]
