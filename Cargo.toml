@@ -28,3 +28,4 @@ nacl = {version="0.5.3", optional=true}
 rand = "0.8.4"
 toml = "0.5.9"
 regex = "1.5.6"
+chrono = "0.4.26"

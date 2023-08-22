@@ -16,10 +16,10 @@ pub struct LiquidityPoolCallBuilder<'a> {
 impl<'a> LiquidityPoolCallBuilder<'a> {
     pub fn new(s: &'a Server) -> Self {
         Self {
-            server_url: &s.0,
+            server_url: &s.server_url,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
-            token: &s.1,
+            token: &s.options.auth_token,
         }
     }
 
@@ -88,7 +88,8 @@ mod tests {
 
     #[test]
     fn test_limit_liquidity_pools() {
-        let s = Server::new(String::from("https://horizon.stellar.org"));
+        let s = Server::new(String::from("https://horizon.stellar.org"), None)
+            .expect("Cannot connect to insecure horizon server");
 
         let mut lpcb = LiquidityPoolCallBuilder::new(&s);
 
@@ -99,7 +100,8 @@ mod tests {
 
     #[test]
     fn test_liquidity_pools_for_assets() {
-        let s = Server::new(String::from("https://horizon.stellar.org"));
+        let s = Server::new(String::from("https://horizon.stellar.org"), None)
+            .expect("Cannot connect to insecure horizon server");
 
         let y_xlm_str = "yXLM:GARDNV3Q7YGT4AKSDF25LT32YSCCW4EV22Y2TV3I2PU2MMXJTEDL5T55";
 
