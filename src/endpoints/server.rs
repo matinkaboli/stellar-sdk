@@ -11,11 +11,13 @@ use crate::endpoints::{
 };
 use crate::types::{
     Account, Asset, ClaimableBalance, FeeStats, Ledger, LiquidityPool, Offer, Operation,
-    StrictPathSource, Transaction,
+    StrictPathSource, SubmitTransactionResponse, Transaction,
 };
 use crate::utils::request::get_current_server_time;
 
 use super::EffectCallBuilder;
+
+use stellar_base::{transaction::Transaction as TransactionSBase, xdr::XDRSerialize};
 
 #[derive(Debug, Clone)]
 pub struct Server {
@@ -261,6 +263,24 @@ impl Server {
         }
     }
 
+    pub fn submit_transaction(
+        &self,
+        transaction: TransactionSBase,
+    ) -> Result<SubmitTransactionResponse, anyhow::Error> {
+        let tx = transaction.into_envelope().xdr_base64()?;
+        let url = format!("{}/transactions/", self.server_url);
+
+        let mut query = HashMap::new();
+        query.insert("tx".to_string(), tx.to_string());
+
+        api_call::<SubmitTransactionResponse>(
+            url,
+            crate::types::HttpMethod::POST,
+            &query,
+            &self.options.auth_token,
+        )
+    }
+
     pub fn effects(&self) -> EffectCallBuilder {
         EffectCallBuilder::new(self)
     }
@@ -269,6 +289,15 @@ impl Server {
 #[cfg(test)]
 mod tests {
     use crate::{endpoints::call_builder::CallBuilder, utils::Endpoint};
+    use std::str::FromStr;
+    use stellar_base::{
+        amount::Amount,
+        asset::Asset,
+        memo::Memo,
+        operations::Operation,
+        transaction::{Transaction, MIN_BASE_FEE},
+        KeyPair, Network, PublicKey,
+    };
 
     use super::*;
 
@@ -370,5 +399,48 @@ mod tests {
         let local_now: DateTime<Local> = Local::now();
         let local_timestamp = local_now.timestamp();
         assert!(timebounds.min_time + local_timestamp < timebounds.max_time);
+    }
+
+    #[test]
+    fn test_submit_transaction() {
+        let s = Server::new(String::from("https://horizon-testnet.stellar.org"), None)
+            .expect("Cannot connect to insecure horizon server");
+
+        // Test can easily fail because someone drained the wallet, but it's okay for now later can be used .env or always asking the friendbot with new random wallet
+        let source_keypair =
+            KeyPair::from_secret_seed("SCPQMOR2R2PGTFGBHXTSP4KB47Y6XVLAZEOCCMSAU6QXP3KPLXRVXZBV")
+                .unwrap();
+
+        let destination =
+            PublicKey::from_account_id("GAST24JSPH5S5Z2HC5PKEVQYDZIPFLOEC26KLVDNPVFVNNRALVTM6SCN")
+                .unwrap();
+
+        let payment_amount = Amount::from_str("0.1").unwrap();
+
+        let payment = Operation::new_payment()
+            .with_destination(destination.clone())
+            .with_amount(payment_amount)
+            .unwrap()
+            .with_asset(Asset::new_native())
+            .build()
+            .unwrap();
+
+        let account = s
+            .load_account(&source_keypair.public_key().clone().to_string())
+            .unwrap();
+
+        let sequence = account.sequence.parse::<i64>().unwrap() + 1;
+
+        let mut tx =
+            Transaction::builder(source_keypair.public_key().clone(), sequence, MIN_BASE_FEE)
+                .with_memo(Memo::Text("stellar_sdk_test".to_string()))
+                .add_operation(payment)
+                .into_transaction()
+                .unwrap();
+
+        let _ = tx.sign(&source_keypair, &Network::new_test());
+
+        let response = s.submit_transaction(tx);
+        assert_eq!(response.is_ok(), true);
     }
 }
