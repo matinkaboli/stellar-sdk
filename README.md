@@ -74,3 +74,49 @@ fn main() {
     println!("{:#?}", usdc_liquidity_pools);
 }
 ```
+
+## Todo
+
+### Asset
+
+- get_raw_asset_type
+- to_change_trust_XDR_object
+- to_trustline_XDR_object
+- to_XDR_object
+- from_operation
+
+### Claimant
+
+### FeeBumpTransaction
+
+### Keypair
+
+- master
+- xdr_account_id
+- xdr_public_key
+- xdr_muxed_account
+- signature_hint
+- sign_payload_decorated
+- sign_decorated
+
+### LiquidityPoolAsset
+
+### LiquidityPoolId
+
+### Memo
+
+### MuxedAccount
+
+### Operation
+
+### Server
+
+- checkMemoRequired
+
+### SignerKey
+
+### Transaction
+
+### Transaction Builder
+
+### Globals

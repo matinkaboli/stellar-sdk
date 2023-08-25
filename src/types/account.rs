@@ -45,6 +45,14 @@ impl Account {
 
         self.sequence = new_sequence;
     }
+
+    pub fn account_id(&self) -> &str {
+        &self.account_id
+    }
+
+    pub fn sequence_number(&self) -> &str {
+        &self.sequence
+    }
 }
 
 #[cfg(test)]

@@ -114,14 +114,6 @@ impl Keypair {
     pub fn random() -> Result<Self, anyhow::Error> {
         Self::new_from_secret_key(rand::random::<[u8; 32]>().to_vec())
     }
-
-    // fn master
-    // fn xdr_account_id
-    // fn xdr_public_key
-    // fn xdr_muxed_account
-    // fn signature_hint
-    // fn sign_payload_decorated
-    // fn sign_decorated
 }
 
 #[cfg(test)]

@@ -5,7 +5,7 @@ use regex::Regex;
 
 use crate::StrKey;
 
-#[derive(Debug)]
+#[derive(Debug, Eq)]
 pub struct Asset(String, String, bool); // code, issuer, is_native
 
 impl Asset {
@@ -60,6 +60,12 @@ impl Asset {
         query_string.insert(format!("{}_asset_issuer", name), self.1.clone());
         query_string
     }
+
+    // TODO: get_raw_asset_type
+    // TODO: to_change_trust_XDR_object
+    // TODO: to_trustline_XDR_object
+    // TODO: to_XDR_object
+    // TODO: from_operation
 }
 
 impl ToString for Asset {
@@ -81,7 +87,7 @@ impl FromStr for Asset {
         Self::new(String::from(parts[0]), String::from(parts[1]))
     }
 }
-impl Eq for Asset {}
+
 impl PartialEq for Asset {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0 && self.1 == other.1 && self.2 == other.2
