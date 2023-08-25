@@ -58,9 +58,9 @@ impl<'a> StrictReceiveCallBuilder<'a> {
         destination_amount: &str,
     ) -> Self {
         let mut new_self = Self {
-            server_url: &s.0,
+            server_url: &s.server_url,
             query_params: HashMap::new(),
-            token: &s.1,
+            token: &s.options.auth_token,
         };
 
         match source {
@@ -96,7 +96,8 @@ mod tests {
 
     #[test]
     fn test_strict_receive() {
-        let s = Server::new(String::from("https://horizon.stellar.org"));
+        let s = Server::new(String::from("https://horizon.stellar.org"), None)
+            .expect("Cannot connect to insecure horizon server");
 
         let native = Asset::native();
         let _bat = Asset::new(

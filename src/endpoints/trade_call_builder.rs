@@ -15,10 +15,10 @@ pub struct TradeCallBuilder<'a> {
 impl<'a> TradeCallBuilder<'a> {
     pub fn new(s: &'a Server) -> Self {
         Self {
-            server_url: &s.0,
+            server_url: &s.server_url,
             endpoint: Endpoint::None,
             query_params: HashMap::new(),
-            token: &s.1,
+            token: &s.options.auth_token,
         }
     }
 
@@ -97,7 +97,8 @@ mod tests {
 
     #[test]
     fn limit_trade_call_builder() {
-        let s = Server::new(String::from("https://horizon.stellar.org"));
+        let s = Server::new(String::from("https://horizon.stellar.org"), None)
+            .expect("Cannot connect to insecure horizon server");
 
         let mut tcb = TradeCallBuilder::new(&s);
 
@@ -108,7 +109,8 @@ mod tests {
 
     #[test]
     fn test_trade_call_builder_asset_pair() {
-        let s = Server::new(String::from("https://horizon.stellar.org"));
+        let s = Server::new(String::from("https://horizon.stellar.org"), None)
+            .expect("Cannot connect to insecure horizon server");
 
         let native = Asset::native();
         let y_usdc = Asset::new(
@@ -129,7 +131,8 @@ mod tests {
 
     #[test]
     fn test_for_type() {
-        let s = Server::new(String::from("https://horizon.stellar.org"));
+        let s = Server::new(String::from("https://horizon.stellar.org"), None)
+            .expect("Cannot connect to insecure horizon server");
 
         let _records = s.trades().for_type(TradeType::Orderbook).call().unwrap();
     }

@@ -1,4 +1,4 @@
-use anyhow::{self};
+use anyhow::anyhow;
 use serde::de::DeserializeOwned;
 use std::collections::HashMap;
 use ureq::{self, Error as UreqError};
@@ -38,7 +38,7 @@ pub fn api_call<T: DeserializeOwned>(
                 let res_str = res.into_string()?;
                 let parsed: HorizonError = serde_json::from_str(&res_str)?;
 
-                Err(parsed.into())
+                Err(anyhow!("{:?}", parsed))
             }
             other => Err(other.into()),
         },

@@ -9,7 +9,7 @@
 //! use stellar_sdk::{CallBuilder, Server, types::Asset, utils::{Direction, Endpoint}};
 //!
 //!     let s = String::from("https://horizon.stellar.org");
-//!     let s = Server::new(s);
+//!     let s = Server::new(s, None).expect("Cannot connect to insecure horizon server");
 //!
 //!     let my_acc = s
 //!         .load_account("GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM")
@@ -77,7 +77,7 @@ mod tests {
     #[test]
     fn test_app() {
         let s = String::from("https://horizon.stellar.org");
-        let s = Server::new(s);
+        let s = Server::new(s, None).expect("Cannot connect to insecure horizon server");
 
         let _my_acc = s
             .load_account("GAUZUPTHOMSZEV65VNSRMUDAAE4VBMSRYYAX3UOWYU3BQUZ6OK65NOWM")
