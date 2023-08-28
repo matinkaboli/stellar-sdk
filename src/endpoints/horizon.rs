@@ -94,6 +94,7 @@ pub struct Flags {
     pub auth_required: bool,
     pub auth_revocable: bool,
     pub auth_immutable: bool,
+    #[serde(default)] // Backwards compatibility with protocol version 15 for example where this auth_clawback_enabled field not existing
     pub auth_clawback_enabled: bool,
 }
 
