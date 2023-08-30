@@ -12,6 +12,7 @@ pub struct Keypair {
     secret_seed: Option<Vec<u8>>,
 }
 
+#[allow(dead_code)]
 impl Keypair {
     fn new_from_secret_key(secret_seed: Vec<u8>) -> Result<Self, anyhow::Error> {
         if secret_seed.len() != 32 {
