@@ -268,7 +268,7 @@ impl Server {
         transaction: TransactionSBase,
     ) -> Result<SubmitTransactionResponse, anyhow::Error> {
         let tx = transaction.into_envelope().xdr_base64()?;
-        let url = format!("{}/transactions/", self.server_url);
+        let url = format!("{}/transactions", self.server_url);
 
         let mut query = HashMap::new();
         query.insert("tx".to_string(), tx.to_string());

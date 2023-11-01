@@ -1,16 +1,18 @@
 use anyhow::bail;
 use nacl::sign::{generate_keypair, signature, verify};
 use str_key::StrKey;
+use stellar_base::crypto::{SecretKey, KeyPair};
 
 use crate::str_key;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Keypair {
     public_key: Vec<u8>,
     secret_key: Option<Vec<u8>>,
     secret_seed: Option<Vec<u8>>,
 }
 
+#[allow(dead_code)]
 impl Keypair {
     fn new_from_secret_key(secret_seed: Vec<u8>) -> Result<Self, anyhow::Error> {
         if secret_seed.len() != 32 {
@@ -116,6 +118,25 @@ impl Keypair {
     }
 }
 
+// Easy conversion between stellar_sdk and stellar_base keypairs and vica versa
+impl From<Keypair> for KeyPair {
+    fn from(sdk_keypair: Keypair) -> Self {
+        let mut sdk_keypair_inner = sdk_keypair;
+        let secret_key: String = sdk_keypair_inner.secret_key().expect("Failed to get the secret key from the stellar_sdk::Keypair");
+        let stellar_base_keypair = KeyPair::from_secret_seed(&secret_key).expect("Failed to convert to generate stellar_base::KeyPair from the secret seed");
+        stellar_base_keypair
+    }
+}
+
+impl From<KeyPair> for Keypair {
+    fn from(base_keypair: KeyPair) -> Self {
+        let secret_key_struct: &SecretKey = base_keypair.secret_key();
+        let secret_key: String = secret_key_struct.secret_seed().into();
+        let stellar_sdk_keypair = Keypair::from_secret_key(&secret_key).expect("Failed to convert to generate stellar_sdk::Keypair from the secret seed");
+        stellar_sdk_keypair
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -198,5 +219,14 @@ mod tests {
 
         assert_ne!(keypair_1.raw_secret_key(), keypair_2.raw_secret_key());
         assert_ne!(keypair_2.raw_secret_key(), keypair_3.raw_secret_key());
+    }
+
+    #[test]
+    fn test_keypair_conversion() {
+        let keypair_sdk = Keypair::random().unwrap();
+        let keypair_base: KeyPair = keypair_sdk.clone().into();
+        let keypair_sdk2: Keypair = keypair_base.into();
+    
+        assert_eq!(keypair_sdk, keypair_sdk2);
     }
 }
