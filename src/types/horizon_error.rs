@@ -8,7 +8,7 @@ pub struct HorizonError {
     pub r#type: String,
     pub title: String,
     pub status: i16,
-    pub detail: String,
+    pub detail: Option<String>,
     pub extras: Option<ExtraHorizonError>,
 }
 
