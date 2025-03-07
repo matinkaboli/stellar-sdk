@@ -296,7 +296,7 @@ mod tests {
         memo::Memo,
         operations::Operation,
         transaction::{Transaction, MIN_BASE_FEE},
-        KeyPair, Network, PublicKey,
+        crypto::SodiumKeyPair, Network, PublicKey,
     };
 
     use super::*;
@@ -408,7 +408,7 @@ mod tests {
 
         // Test can easily fail because someone drained the wallet, but it's okay for now later can be used .env or always asking the friendbot with new random wallet
         let source_keypair =
-            KeyPair::from_secret_seed("SCPQMOR2R2PGTFGBHXTSP4KB47Y6XVLAZEOCCMSAU6QXP3KPLXRVXZBV")
+        SodiumKeyPair::from_secret_seed("SCPQMOR2R2PGTFGBHXTSP4KB47Y6XVLAZEOCCMSAU6QXP3KPLXRVXZBV")
                 .unwrap();
 
         let destination =
@@ -438,7 +438,7 @@ mod tests {
                 .into_transaction()
                 .unwrap();
 
-        let _ = tx.sign(&source_keypair, &Network::new_test());
+        let _ = tx.sign(&source_keypair.as_ref(), &Network::new_test());
 
         let response = s.submit_transaction(tx);
         assert_eq!(response.is_ok(), true);

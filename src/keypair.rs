@@ -1,7 +1,7 @@
 use anyhow::bail;
 use nacl::sign::{generate_keypair, signature, verify};
+use stellar_base::crypto::{SecretKey, SodiumKeyPair};
 use str_key::StrKey;
-use stellar_base::crypto::{SecretKey, KeyPair};
 
 use crate::str_key;
 
@@ -119,20 +119,24 @@ impl Keypair {
 }
 
 // Easy conversion between stellar_sdk and stellar_base keypairs and vica versa
-impl From<Keypair> for KeyPair {
+impl From<Keypair> for SodiumKeyPair {
     fn from(sdk_keypair: Keypair) -> Self {
         let mut sdk_keypair_inner = sdk_keypair;
-        let secret_key: String = sdk_keypair_inner.secret_key().expect("Failed to get the secret key from the stellar_sdk::Keypair");
-        let stellar_base_keypair = KeyPair::from_secret_seed(&secret_key).expect("Failed to convert to generate stellar_base::KeyPair from the secret seed");
+        let secret_key: String = sdk_keypair_inner
+            .secret_key()
+            .expect("Failed to get the secret key from the stellar_sdk::Keypair");
+        let stellar_base_keypair = SodiumKeyPair::from_secret_seed(&secret_key)
+            .expect("Failed to convert to generate stellar_base::KeyPair from the secret seed");
         stellar_base_keypair
     }
 }
 
-impl From<KeyPair> for Keypair {
-    fn from(base_keypair: KeyPair) -> Self {
+impl From<SodiumKeyPair> for Keypair {
+    fn from(base_keypair: SodiumKeyPair) -> Self {
         let secret_key_struct: &SecretKey = base_keypair.secret_key();
         let secret_key: String = secret_key_struct.secret_seed().into();
-        let stellar_sdk_keypair = Keypair::from_secret_key(&secret_key).expect("Failed to convert to generate stellar_sdk::Keypair from the secret seed");
+        let stellar_sdk_keypair = Keypair::from_secret_key(&secret_key)
+            .expect("Failed to convert to generate stellar_sdk::Keypair from the secret seed");
         stellar_sdk_keypair
     }
 }
@@ -224,9 +228,9 @@ mod tests {
     #[test]
     fn test_keypair_conversion() {
         let keypair_sdk = Keypair::random().unwrap();
-        let keypair_base: KeyPair = keypair_sdk.clone().into();
+        let keypair_base: SodiumKeyPair = keypair_sdk.clone().into();
         let keypair_sdk2: Keypair = keypair_base.into();
-    
+
         assert_eq!(keypair_sdk, keypair_sdk2);
     }
 }
