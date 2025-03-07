@@ -1,6 +1,6 @@
 [package]
 name = "stellar_sdk"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 authors = ["Matin Kaboli <matinkaboli@aol.com>"]
 description = "stellar_sdk is a library for working with the Stellar Horizon server"
