@@ -13,7 +13,7 @@ A lightweight Rust library for communicating with a Stellar Horizon server.
 Add `stellar_sdk` to your Cargo.toml file and run `cargo run`
 
 ```
-"stellar_sdk" = "0.1.3"
+"stellar_sdk" = "0.1.5"
 ```
 
 ## Usage

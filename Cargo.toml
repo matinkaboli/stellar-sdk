@@ -1,6 +1,6 @@
 [package]
 name = "stellar_sdk"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 authors = ["Matin Kaboli <matinkaboli@aol.com>"]
 description = "stellar_sdk is a library for working with the Stellar Horizon server"
@@ -29,5 +29,5 @@ rand = "0.8.4"
 toml = "0.5.9"
 regex = "1.5.6"
 chrono = "0.4.26"
-stellar-base = "0.5.0"
-sodiumoxide = "=0.2.6"
+stellar-base = "0.6.0"
+sodiumoxide = "0.2.7"
