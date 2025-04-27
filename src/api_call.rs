@@ -36,10 +36,10 @@ pub fn api_call<T: DeserializeOwned>(
                 }
 
                 let res_str = res.into_string()?;
-                match serde_json::from_str::<HorizonError>(&res_str) {
-                    Ok(parsed) => Err(parsed.into()),
-                    Err(_) => Err(anyhow!("Cannot parse error: {}", res_str)),
-                }
+                Err(match serde_json::from_str::<HorizonError>(&res_str) {
+                    Ok(parsed) => parsed.into(),
+                    Err(_) => anyhow!("Cannot parse error: {}", res_str),
+                })
             }
             other => Err(other.into()),
         },
