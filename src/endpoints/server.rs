@@ -185,7 +185,7 @@ impl Server {
         base: &'a Asset,
         counter: &'a Asset,
         resolution: &'a str,
-    ) -> TradeAggregationCallBuilder {
+    ) -> TradeAggregationCallBuilder<'a> {
         TradeAggregationCallBuilder::new(self, base, counter, resolution)
     }
 
@@ -198,7 +198,7 @@ impl Server {
         source: &StrictPathSource,
         destination_asset: Asset,
         destination_amount: String,
-    ) -> StrictReceiveCallBuilder {
+    ) -> StrictReceiveCallBuilder<'a> {
         StrictReceiveCallBuilder::new(self, source, &destination_asset, &destination_amount)
     }
 
@@ -207,7 +207,7 @@ impl Server {
         destination: &StrictPathSource,
         source_asset: &'a Asset,
         source_amount: &'a str,
-    ) -> StrictSendCallBuilder {
+    ) -> StrictSendCallBuilder<'a> {
         StrictSendCallBuilder::new(self, destination, source_asset, source_amount)
     }
 
@@ -387,7 +387,7 @@ mod tests {
 
         let my_trade = s.trades().for_offer("4").limit(1).call().unwrap();
 
-        assert_eq!("4", my_trade._embedded.records[0].base_offer_id)
+        assert_eq!(Some("4"), my_trade._embedded.records[0].base_offer_id.as_deref())
     }
 
     #[test]
