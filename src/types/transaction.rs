@@ -34,7 +34,6 @@ pub struct Transaction {
     pub operation_count: u64,
     pub envelope_xdr: String,
     pub result_xdr: String,
-    // pub result_meta_xdr: String,
     pub fee_meta_xdr: String,
     pub memo_type: String,
     pub signatures: Vec<String>,
