@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 use std::{error::Error, fmt::Formatter};
 
 use serde::{Deserialize, Serialize};
@@ -13,8 +13,8 @@ pub struct HorizonError {
 }
 
 impl Display for HorizonError {
-    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Result::Ok(())
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(self, f)
     }
 }
 
@@ -30,5 +30,5 @@ pub struct ExtraHorizonError {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ErrorResultCode {
     pub transaction: String,
-    pub operations: Vec<String>,
+    pub operations: Option<Vec<String>>,
 }

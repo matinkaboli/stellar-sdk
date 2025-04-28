@@ -25,7 +25,6 @@ pub struct SubmitTransactionResponse {
     pub operation_count: i32,
     pub envelope_xdr: String,
     pub result_xdr: String,
-    pub result_meta_xdr: String,
     pub fee_meta_xdr: Option<String>,
     pub memo_type: String,
     pub signatures: Vec<String>,
